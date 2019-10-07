@@ -1,0 +1,56 @@
+{
+  "name": "my-portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.4.0",
+    "@material-ui/icons": "^4.2.1",
+    "@tonaljs/chord": "^3.2.2",
+    "@tonaljs/chord-dictionary": "^3.2.2",
+    "@tonaljs/midi": "^3.2.2",
+    "@tonaljs/note": "^3.2.2",
+    "@tonaljs/scale": "^3.2.2",
+    "@tonaljs/scale-dictionary": "^3.2.2",
+    "@tonaljs/tonal": "^3.2.2",
+    "@tonejs/midi": "^2.0.7",
+    "audiokeys": "^0.1.1",
+    "immutable": "^4.0.0-rc.12",
+    "react": "^16.9.0",
+    "react-app-polyfill": "^1.0.2",
+    "react-dom": "^16.9.0",
+    "react-router-dom": "^5.0.1",
+    "react-scripts": "3.1.1",
+    "soundjs": "^1.0.1",
+    "tone": "^13.8.25",
+    "uuid": "^3.3.3",
+    "victory": "^33.0.5",
+    "virtual-audio-graph": "^1.1.6",
+    "xsound": "^2.14.1"
+  },
+  "devDependencies": {
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.14.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
