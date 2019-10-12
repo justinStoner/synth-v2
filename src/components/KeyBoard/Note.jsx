@@ -36,12 +36,32 @@ const styles = theme => ({
     textAlign: 'center',
     paddingTop: '100%',
     border: `2px solid ${theme.palette.text.disabled}`,
+    '&$isActive': {
+      backgroundColor: theme.palette.primary['A200'],
+      color: 'white',
+      border: '2px solid transparent',
+    },
+    '&$hover': {
+      border: '2px solid transparent',
+      backgroundColor: theme.palette.primary['A200'],
+      color: 'white',
+    },
   },
   grey: {
     backgroundColor: grey[500],
     color: 'white',
     textAlign: 'center',
+    '&$isActive': {
+      backgroundColor: theme.palette.secondary['A100'],
+      color: 'white',
+    },
+    '&$hover': {
+      backgroundColor: theme.palette.secondary['A100'],
+      color: 'white',
+    },
   },
+  isActive: {},
+  hover: {},
 })
 
 class Note extends React.Component {
@@ -66,65 +86,55 @@ class Note extends React.Component {
   }
 
   state = {
-    active: false,
+    hover: false,
     touchid: -1,
   }
 
-  setActive = active => {
-    this.setState({ active, touchid: active? this.state.touchid : -1 });
-    const { note } = this.props;
-    const eventName = active ? 'noteon' : 'noteoff'
-    // this.dispatchEvent(new CustomEvent(eventName, {
-    //   detail : {
-    //     name : this.fromMidi(note),
-    //     midi : note,
-    //     velocity : active ? 1 : 0,
-    //   },
-    //   composed : true,
-    //   bubbles : true,
-    // }));
+  setActive = () => {
+    this.props.setActiveNote(this.props.note)
   }
 
   mouseover = e => {
-    if (e.buttons){
-      this.setActive(true)
-      this.shadowRoot.querySelector('button').focus()
-    }
+    this.setState({ hover: true })
+  }
+
+  mouseleave = e => {
+    this.setState({ hover: false })
   }
 
   keydown = e => {
     resume(e)
     if (!e.repeat && (e.key === ' ' || e.key === 'Enter')){
-      this.setActive(true)
+      this.setActive(this.props.note)
     }
   }
 
   keyup = e => {
     if (e.key === ' ' || e.key === 'Enter'){
-      this.setActive(false)
+      this.setActive(this.props.note)
     }
   }
 
   touchstart = e => {
     e.preventDefault()
     this.touchid = e.touches[0].identifier
-    this.setActive(true)
+    this.setActive(this.props.note)
   }
 
   render(){
-    const { classes, note, isWhite } = this.props;
-    const { active } = this.state;
-    const show = note !== 0
+    const { classes, note, isWhite, isActive, setActiveNote } = this.props;
+    const { hover } = this.state;
+    const show = note > 0
     return (
       <div className={classes.container}>
         {show && <Paper
-          className={clsx(classes.paper, isWhite ? classes.white : classes.grey)}
+          className={clsx(classes.paper, isWhite ? classes.white : classes.grey, isActive && classes.isActive, (!isActive && hover) && classes.hover)}
           onMouseOver={this.mouseover}
-          onMouseLeave={() => this.setActive(false)}
-          onMouseDown={() => this.setActive(true)}
+          onMouseLeave={this.mouseleave}
+          onMouseDown={() => this.setActive(note)}
           onTouchStart={this.touchstart}
-          onTouchEnd={() => this.setActive(false)}
-          onMouseUp={() => this.setActive(false)}
+          onTouchEnd={() => this.setActive(note)}
+          onMouseUp={() => this.setActive(note)}
           onKeyDown={this.keydown}
           onKeyUp={this.keyup}
           elevation={0}

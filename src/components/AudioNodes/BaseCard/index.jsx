@@ -15,8 +15,10 @@ const styles = theme => ({
   },
 });
 
-const BaseCard = ({ label, classes, children, headerComponent }) => (
-  <Grid item xs={12} md={4} lg={3}>
+const defaultSize = { lg: 3, md: 4, xs: 12 };
+
+const BaseCard = ({ label, classes, children, headerComponent, size = defaultSize }) => (
+  <Grid item {...size}>
     <Paper className={classes.paper}>
       <div>
         <Typography variant="subtitle1" style={headerComponent ? { display: 'inline' } : undefined}>{label}</Typography>

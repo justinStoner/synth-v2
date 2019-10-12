@@ -45,15 +45,6 @@ class Octave extends React.Component {
   static defaultProps = {
     octave: 1,
   }
-  noteon = number => {
-    const note = this.shadowRoot.querySelector(`tone-keyboard-note[note="${number}"]`)
-    note.active = true
-  }
-
-  noteoff = number => {
-    const note = this.shadowRoot.querySelector(`tone-keyboard-note[note="${number}"]`)
-    note.active = false
-  }
 
   getNoteByTouchId = id => {
     const element = Array.from(this.shadowRoot.querySelectorAll('tone-keyboard-note')).find(e => e.touchid === id)
@@ -63,17 +54,17 @@ class Octave extends React.Component {
   }
 
   render(){
-    const { octave, classes } = this.props;
+    const { octave, classes, activeNotes, noteOn, noteOff, setActiveNote } = this.props;
     const startNote = 12 * octave
     const whiteNotes = [0, 2, 4, 5, 7, 9, 11].map(i => i + startNote)
-    const blackNotes = [0, 1, 3, 0, 6, 8, 10, 0].map(i => i ? i + startNote : 0)
+    const blackNotes = [0, 1, 3, -1, 6, 8, 10, -2].map(i => i > 0 ? i + startNote : i)
     return(
       <div className={classes.container}>
         <div className={classes.whiteNotes}>
-          {whiteNotes.map(note => <div key={note} className={classes.note}><Note isWhite key={note} note={note} /></div>)}
+          {whiteNotes.map(note => <div key={note} className={classes.note}><Note setActiveNote={setActiveNote} isWhite isActive={activeNotes[note]} noteOn={noteOn} noteOff={noteOff} note={note} /></div>)}
         </div>
         <div className={classes.blackNotes}>
-          {blackNotes.map(note => <div key={note} className={classes.note}><Note key={note} note={note} /></div>)}
+          {blackNotes.map(note => <div key={note} className={classes.note}><Note setActiveNote={setActiveNote} isActive={activeNotes[note]} noteOn={noteOn} noteOff={noteOff} note={note} /></div>)}
         </div>
       </div>
     );

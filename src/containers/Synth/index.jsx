@@ -22,14 +22,6 @@ const styles = theme => ({
   },
 });
 
-// const setToneInstrumentValues = (toneInstrument, newValues) => {
-//   Object.keys(newValues).forEach(key => {
-//     if (!Array.isArray(newValues[key]) && typeof newValues[key] !== 'number' && typeof newValues[key] !== 'string') {
-//       Object.keys(newValues[key]).forEach()
-//     }
-//   })
-// }
-
 class Synth extends React.PureComponent {
   static propTypes = {
     polyphonic: PT.bool,
@@ -38,20 +30,26 @@ class Synth extends React.PureComponent {
     polyphonic: false,
   }
 
+  getUpdateInstrument = instrumentName => (path, newState) => {
+    this.props.audioContext.updateInstrument(instrumentName, path, newState);
+  }
+
   render() {
     const { classes, match, audioContext } = this.props;
     const defaultId = audioContext.instruments.first().get('id')
     return (
       <Switch>
-        <Route path={`${match.path}/:id`} render={({ match: instrumentMatch }) => {
-          console.log(instrumentMatch)
-          const instrument = audioContext.instruments.get(instrumentMatch.params.id) || audioContext.instruments.get(defaultId);
+        <Route sensitive path={`${match.path}/:id`} render={({ match: instrumentMatch }) => {
+          const instrumentId = instrumentMatch.params.id
+          const instrument = audioContext.instruments.get(instrumentId) || audioContext.instruments.get(defaultId);
+          const preset = instrument.get('preset');
           return (
-            <Instrument path={instrumentMatch.path}
-              audioNode={instrument}
+            <Instrument
+              path={instrumentMatch.path}
+              instrument={instrument}
               output={audioContext.output}
-              setInstrument={audioContext.setInstrument}
               setEffect={audioContext.setEffect}
+              updateInstrument={this.getUpdateInstrument(instrumentId)}
             />
           )
         }} />

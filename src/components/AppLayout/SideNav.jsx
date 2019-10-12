@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { withRouter } from 'react-router';
+import { NavLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core';
 import Drawer from '@material-ui/core/Drawer';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -13,6 +14,7 @@ import Divider from '@material-ui/core/Divider';
 import { drawerWidth } from './constants';
 import { withAppLayoutContext } from '../../context/AppLayout';
 import routes from '../../routes';
+import Meter from '../Visualizations/Meter';
 import { withAudioContext } from '../../context/AudioContext';
 
 const useStyles = makeStyles(theme => ({
@@ -48,6 +50,27 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
+function ListItemLink(props) {
+  const { icon, secondary, to, textClassName } = props;
+
+  const renderLink = React.useMemo(
+    () =>
+      React.forwardRef((itemProps, ref) => (
+        // With react-router-dom@^6.0.0 use `ref` instead of `innerRef`
+        // See https://github.com/ReactTraining/react-router/issues/6056
+        <NavLink to={to} activeClassName="Mui-selected" {...itemProps} innerRef={ref} />
+      )),
+    [to],
+  );
+
+  return (
+    <ListItem inset dense button component={renderLink}>
+      {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+      <ListItemText className={textClassName} secondary={secondary} />
+    </ListItem>
+  );
+}
+
 const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
   const classes = useStyles();
   const { open, setOpen } = appLayoutContext;
@@ -68,21 +91,25 @@ const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
       <List>
         {
           routes.map(route => (
-            <>
-            <ListItem button key={route.name} onClick={() => {if (!route.getSubItems) history.push(route.route)}}>
-              <ListItemIcon>
-                {route.icon}
-              </ListItemIcon>
-              <ListItemText primary={route.name} />
-            </ListItem>
-            {
-              route.subItems && route.subItems.map(item => (
-                <ListItem dense inset button key={item.route}>
-                  <ListItemText onClick={() => {history.push(item.route)}} className={classes.dense} inset secondary={item.name} />
-                </ListItem>
-              ))
-            }
-          </>
+            <React.Fragment key={route.name}>
+              <ListItem button key={route.name} onClick={() => {if (!route.getSubItems) history.push(route.route)}}>
+                <ListItemIcon>
+                  {route.icon}
+                </ListItemIcon>
+                <ListItemText primary={route.name} />
+              </ListItem>
+              {
+                route.subItems && route.subItems.map(item => (
+                  <ListItemLink
+                    icon={<Meter style={{ padding: '0px 6px' }} barWidth={9} input={item.id} height={14} width={14} />}
+                    textClassName={classes.dense}
+                    key={item.route}
+                    secondary={item.name}
+                    to={item.route}
+                  />
+                ))
+              }
+            </React.Fragment>
           ))
         }
       </List>

@@ -4,7 +4,7 @@ import CardVisualization from '../../Visualizations/CardVisualization';
 import { OfflineVisualization } from '../../Visualizations/OfflineVisualization';
 import { withTheme } from '@material-ui/styles';
 
-class Visuzliation extends React.Component {
+class Visuzliation extends React.PureComponent {
 
   state = { buffer: [] }
 
@@ -21,8 +21,8 @@ class Visuzliation extends React.Component {
   }
 
   getBuffer = async () => {
-    const { oscillator } = this.props;
-    const options = oscillator.get()
+    const { audioNode } = this.props;
+    const options = audioNode.get()
     const buffer = await Tone.Offline(() => {
       const clone = new Tone.OmniOscillator(options)
       clone.frequency.value = 200

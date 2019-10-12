@@ -4,6 +4,8 @@ import { SliderWithLabel } from '../../Slider';
 import BaseCard, { SmallSelect } from '../BaseCard';
 import { withInstrumentContext, withPartialInstrumentContext } from '../../../context/InstrumentContext';
 import Visualization from './Vizualization';
+import FrequencyEnvelope from './FrequencyEnvelope';
+import Envelope from './Envelope';
 import { envelopeCurvesDisplayNames, decayCurvesDisplayNames } from './utils';
 
 const styles = theme => ({
@@ -12,60 +14,26 @@ const styles = theme => ({
   },
 });
 
-const STEP = 0.05;
+const getComponent = (type, props) => {
+  switch (type) {
+  case 'envelope':
+    return <Envelope {...props} />
+  case 'frequency':
+    return <FrequencyEnvelope {...props} />
+  default:
+    return null;
+  }
+}
 
 export const setEnvelopeValue = (envelopeNode, value, valueName) => {
   envelopeNode[valueName] = value;
 }
 
-const Envelope = ({ label = 'Envelope', classes, envelope, setValue }) => {
-  const { attack, attackCurve, decay, decayCurve, sustain, release, releaseCurve } = envelope.preset;
-  return (
-    <BaseCard label={label}>
-      <Visualization envelope={envelope.node} preset={envelope.preset} />
-      <SliderWithLabel
-        onChange={setValue('attack', setEnvelopeValue)}
-        label="Attack"
-        value={attack}
-        min={0.01}
-        max={2}
-        step={STEP}
-        smallDropdown={
-          <SmallSelect items={envelopeCurvesDisplayNames} label="Curve:" value={attackCurve} onChange={setValue('attackCurve', setEnvelopeValue)} />
-        }
-      />
-      <SliderWithLabel
-        onChange={setValue('decay', setEnvelopeValue)}
-        label="Decay"
-        value={decay}
-        min={0.01}
-        max={2}
-        step={STEP}
-        smallDropdown={
-          <SmallSelect items={decayCurvesDisplayNames} label="Curve:" value={decayCurve} onChange={setValue('decayCurve', setEnvelopeValue)} />
-        }
-      />
-      <SliderWithLabel
-        onChange={setValue('sustain', setEnvelopeValue)}
-        label="Sustain"
-        value={sustain}
-        min={0.01}
-        max={1}
-        step={STEP}
-      />
-      <SliderWithLabel
-        onChange={setValue('release', setEnvelopeValue)}
-        label="Release"
-        value={release}
-        min={0.01}
-        max={4}
-        step={STEP}
-        smallDropdown={
-          <SmallSelect items={envelopeCurvesDisplayNames} label="Curve:" value={releaseCurve} onChange={setValue('releaseCurve', setEnvelopeValue)} />
-        }
-      />
-    </BaseCard>
-  )
-};
+const Env = ({ label = 'Envelope', classes, preset, audioNode, setValue, size, type = 'envelope' }) => (
+  <BaseCard label={label} size={size}>
+    <Visualization audioNode={audioNode} preset={preset} />
+    {getComponent(type, { preset, setValue })}
+  </BaseCard>
+);
 
-export default withStyles(styles)(withPartialInstrumentContext(React.memo(Envelope), 'envelope'))
+export default withStyles(styles)(withPartialInstrumentContext(React.memo(Env)))

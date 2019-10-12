@@ -45,24 +45,11 @@ export const setWet = (node, value) => {
 }
 
 class Effect extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      preset: props.preset || presets.get(props.name),
-    }
-  }
-
-  setEffect = (preset, tone, inputNode, outputNode, setTone) => (valueName, setToneEffect) => (event, value) => {
-    const val = event && event.target && event.target.value ? event.target.value : value;
-    setToneEffect && setToneEffect(tone, val, valueName, preset, inputNode, outputNode, setTone);
-    this.setState({ preset: preset.set(valueName, val) });
-  }
 
   render() {
-    const { label = 'Effect', effectChainSize, noWet, name, tone, index, addEffect, removeEffect, inputNode, outputNode, setTone, moveEffect } = this.props;
-    const { preset } = this.state;
+    const { label = 'Effect', effectChainSize, preset, noWet, name, tone, index, addEffect, removeEffect, inputNode, outputNode, setTone, moveEffect } = this.props;
     const setAudioNode = setTone(index)
-    const setValue = this.setEffect(preset, tone, inputNode, outputNode, setAudioNode);
+    const setValue = this.props.setEffect(preset, tone, inputNode, outputNode, setAudioNode);
     return (
       <BaseCard
         label={label}

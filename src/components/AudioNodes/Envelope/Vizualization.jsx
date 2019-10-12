@@ -4,7 +4,7 @@ import { OfflineVisualization } from '../../Visualizations/OfflineVisualization'
 import { withTheme } from '@material-ui/styles';
 import CardVisualization from '../../Visualizations/CardVisualization';
 
-class Visualization extends React.Component {
+class Visualization extends React.PureComponent {
 
   state = { buffer: [] }
 
@@ -21,8 +21,8 @@ class Visualization extends React.Component {
   }
 
   getBuffer = async () => {
-    const { envelope } = this.props;
-    const options = envelope.get()
+    const { audioNode, preset } = this.props;
+    const options = audioNode.get()
     const padding = 0.001
     const scalar = 1
     const totalTime = options.attack + options.decay + options.release

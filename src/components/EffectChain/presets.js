@@ -8,6 +8,11 @@ export const reverbPresets = [
     dampening: 10000,
     wet: 0.5,
   }),
+  Map({
+    roomSize: 0.25,
+    dampening: 10000,
+    wet: 0.1,
+  }),
 ];
 
 export const lfoPresets = [
@@ -16,17 +21,17 @@ export const lfoPresets = [
     min: 450,
     max: 3000,
     phase: 0,
-    frequency: 1.5,
+    frequency: 1,
     amplitude: 75,
     modulation: 'cutoff',
   }),
   Map({
     type: 'sine',
     min: 1,
-    max: 5,
+    max: 10,
     phase: 0,
-    frequency: 1.5,
-    amplitude: 85,
+    frequency: 2,
+    amplitude: 75,
     modulation: 'q',
   }),
 ];
@@ -66,6 +71,11 @@ export const delayPresets = [
     delayTime: 0.25,
     feedback: 0.15,
     wet: 0.1,
+  }),
+  Map({
+    delayTime: 1,
+    feedback: 0.02,
+    wet: 0.75,
   }),
 ];
 
@@ -121,7 +131,7 @@ export const effectMenuItems = [
   { value: 'filter', label: 'Filter' },
 ]
 
-export const effectPresets = OrderedMap({
+export const effectPresets = {
   reverb: (index = 0) => Map({
     tone: new Tone.Freeverb(reverbPresets[index].toJS()),
     preset: reverbPresets[index],
@@ -158,20 +168,20 @@ export const effectPresets = OrderedMap({
     type: 'filter',
     noWet: true,
   }),
-  compressor: () => Map({
-    tone: new Tone.Compressor(compressorPresets[0].toJS()),
-    preset: compressorPresets[0],
+  compressor: (index = 0) => Map({
+    tone: new Tone.Compressor(compressorPresets[index].toJS()),
+    preset: compressorPresets[index],
     displayName: 'Compressor',
     id: uuid(),
     type: 'compressor',
     noWet: true,
   }),
-});
+};
 
 export const effectPresetsList = List([
-  effectPresets.get('reverb'),
+  effectPresets.reverb,
   //effectPresets.get('chorus'),
   //effectPresets.get('phaser'),
-  effectPresets.get('delay'),
-  effectPresets.get('compressor'),
+  effectPresets.delay,
+  effectPresets.compressor,
 ])

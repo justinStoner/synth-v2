@@ -46,14 +46,6 @@ class EffectChain extends React.PureComponent {
     };
   }
 
-  setEffect = index => (valueName, setToneEffect) => (event, value) => {
-    this.setState((state, props) => {
-      const val = event && event.target && event.target.value ? event.target.value : value;
-      setToneEffect && setToneEffect(state.effectChain.getIn([index, 'tone']), val, valueName)
-      return { effectChain: state.effectChain.mergeIn([index, 'preset'], { [valueName]: val }) }
-    });
-  }
-
   setTone = index => tone => {
     this.setState((state, props) => ({ effectChain: state.effectChain.setIn([index, 'tone'], tone) }));
   }
@@ -74,25 +66,6 @@ class EffectChain extends React.PureComponent {
   getTone = index => this.props.audioContext.getTone(this.props.instrumentId, index)
 
   getPreset = index => this.props.audioContext.getPreset(this.props.instrumentId, index);
-
-  disconnectNode = (index, dispose = true, connectToOutput = true) => {
-    const inputNode = this.getInputNode(index);
-    const tone = this.getTone(index);
-    inputNode.disconnect(tone);
-    if (connectToOutput) {
-      inputNode.connect(this.getOutputNode(index))
-    } else {
-      tone.disconnect(this.getOutputNode(index))
-    }
-    return dispose ? tone.dispose() : tone;
-  }
-
-  connectNode = index => {
-    const inputNode = this.getInputNode(index);
-    const tone = this.getTone(index);
-    inputNode.connect(tone);
-    tone.connect(this.getOutputNode(index));
-  }
 
   removeEffect = index => {
     this.props.audioContext.removeEffect(this.props.instrumentId, index);
@@ -120,7 +93,7 @@ class EffectChain extends React.PureComponent {
             effectMenuItems.map(item => (
               <MenuItem
                 key={item.value}
-                onClick={() => {this.props.audioContext.addEffect(this.props.instrumentId, effectPresets.get(item.value)())}}
+                onClick={() => {this.props.audioContext.addEffect(this.props.instrumentId, effectPresets[item.value]())}}
               >
                 {item.label}
               </MenuItem>
@@ -141,6 +114,7 @@ class EffectChain extends React.PureComponent {
               addEffect={this.addEffect}
               removeEffect={this.removeEffect}
               moveEffect={this.moveEffect}
+              setEffect={this.props.audioContext.setEffect(instrumentId, ['effects', index])}
               effectChainSize={effectChain.size}
               inputNode={this.getInputNode(index)}
               outputNode={this.getOutputNode(index)}

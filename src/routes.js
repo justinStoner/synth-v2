@@ -12,11 +12,23 @@ export default [
     subItems: [
       {
         name: 'Amplitude modulation',
-        route: '/synth/amsynth',
+        route: '/synth/AMSynth',
+        id: 'AMSynth',
       },
       {
         name: 'Frequency modulation',
-        route: '/synth/fmsynth',
+        route: '/synth/FMSynth',
+        id: 'FMSynth',
+      },
+      {
+        name: 'Pluck Synth',
+        route: '/synth/PluckSynth',
+        id: 'PluckSynth',
+      },
+      {
+        name: 'Duo Synth',
+        route: '/synth/DuoSynth',
+        id: 'DuoSynth',
       },
     ],
     getHeader: ({ audioContext, path, id }) => audioContext.instruments.getIn([id, 'displayName']) || 'Synth',

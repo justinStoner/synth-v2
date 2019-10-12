@@ -19,34 +19,35 @@ const styles = theme => ({
   },
 });
 
-const getComponent = (sourceType, oscillator, setValue) => {
+const getComponent = (sourceType, props) => {
   switch (sourceType) {
   case oscillatorSourceTypes.fm:
-    return <FM oscillator={oscillator} setValue={setValue} />;
+    return <FM {...props} />;
   case oscillatorSourceTypes.am:
-    return <AM oscillator={oscillator} setValue={setValue} />;
+    return <AM {...props} />;
   case oscillatorSourceTypes.fat:
-    return <Fat oscillator={oscillator} setValue={setValue} />;
+    return <Fat {...props} />;
   case oscillatorSourceTypes.osc:
-    return <Osc oscillator={oscillator} setValue={setValue} />;
+    return <Osc {...props} />;
   case oscillatorSourceTypes.pulse:
-    return <Pulse oscillator={oscillator} setValue={setValue} />;
+    return <Pulse {...props} />;
   case oscillatorSourceTypes.pwm:
-    return <PWM oscillator={oscillator} setValue={setValue} />;
+    return <PWM {...props} />;
   default:
     return null;
   }
 }
 
-const Oscillator = ({ label = 'Oscillator', classes, oscillator, setValue, setPreset }) => {
-  const { sourceType } = oscillator.preset;
+const Oscillator = ({ label = 'Oscillator', classes, preset, audioNode, setValue, setPreset, size }) => {
+  const sourceType = preset.get('sourceType');
   return (
     <BaseCard
       label={label}
-      headerComponent={<HeaderSelect items={oscillatorSourceTypesDisplayNames} value={sourceType} onChange={e => {setPreset(oscillatorPresets[e.target.value][0]); setSourceType(oscillator.node, e.target.value, null, oscillatorPresets[e.target.value][0])}} />}
+      size={size}
+      headerComponent={<HeaderSelect items={oscillatorSourceTypesDisplayNames} value={sourceType} onChange={e => {setPreset(oscillatorPresets[e.target.value][0]); setSourceType(audioNode, e.target.value, null, oscillatorPresets[e.target.value][0].toJS())}} />}
     >
-      <Visualization oscillator={oscillator.node} preset={oscillator.preset} />
-      {getComponent(sourceType, oscillator, setValue)}
+      <Visualization audioNode={audioNode} preset={preset} />
+      {getComponent(sourceType, { preset, setValue })}
     </BaseCard>
   )
 };

@@ -35,56 +35,75 @@ const styles = theme => ({
   },
 });
 
+const SynthComponents = React.memo(({ synthComponents }) => (
+  <>
+    {synthComponents && synthComponents.valueSeq().map((props, index) => props.component === 'envelope' ? <Envelope {...props} key={props.name + index} /> : <Oscillator {...props} key={props.name + index} />)}
+  </>
+));
+SynthComponents.displayName = 'SynthComponents';
+
+const SliderComponents = React.memo(({ updateInstrument, instrument }) => {
+  const sliderComponents = instrument.get('sliderComponents');
+  return (
+    <>
+      {sliderComponents.valueSeq().map((props, index) => (
+        <Grid key={props.name + index} item xs={props.size || 12 / sliderComponents.size}>
+          <SliderWithLabel
+            onChange={(e, value) => {
+              const newVal = { [props.name]: value };
+              updateInstrument(props.parent ? ['preset', props.parent] : ['preset'], newVal);
+              instrument.get('audioNode').set(props.parent ? { [props.parent]: newVal } : newVal);
+            }}
+            min={props.min}
+            max={props.max}
+            step={props.step}
+            label={props.label}
+            value={instrument.getIn(props.parent ? ['preset', props.parent, props.name] : ['preset', props.name])}
+          />
+        </Grid>
+      ))}
+    </>
+  )
+});
+SliderComponents.displayName = 'SliderComponents';
+
 class Instrument extends React.PureComponent {
   static propTypes = {
-    polyphonic: PT.bool,
     instrument: PT.string.isRequired,
     output: PT.object.isRequired,
   }
-  static defaultProps = {
-    polyphonic: false,
-  }
-
-  constructor(props) {
-    super(props);
-    this.state={
-      instrument: props.audioNode.get('preset'),
-      audioNode: props.audioNode,
-      node: props.audioNode.get('node'),
-      setInstrument: this.setInstrument,
-    }
-  }
-
-  componentWillUnmount() {
-    this.props.setInstrument(this.state.audioNode.get('name'), this.state.instrument)
-  }
-
-  setInstrument = newState => {
-    this.setState((state, props) => {
-      console.log(newState);
-      const preset = Object.assign({}, state.instrument.preset, newState);
-      const instrument = Object.assign({}, state.instrument, { preset });
-      console.log(instrument);
-      return { instrument }
-    });
-  }
 
   noteOn = e => {
-    this.state.node.triggerAttack(e.name, undefined, e.velocity);
+    const audioNode = this.props.instrument.get('audioNode');
+    const attack = audioNode.get('envelope').attakc;
+    if (e.totalPlaying === 1) {
+      this.props.instrument.getIn(['lfo', 'tone']).start();
+      this.props.instrument.getIn(['lfo1', 'tone']).start();
+      this.props.instrument.getIn(['lfoGain']).gain.linearRampToValueAtTime(1, attack);
+      this.props.instrument.getIn(['lfo1Gain']).gain.linearRampToValueAtTime(1, attack);
+    }
+    audioNode.triggerAttack(e.name, undefined, e.velocity);
   }
   noteOff = e => {
-    this.state.node.triggerRelease(e.name);
+    const audioNode = this.props.instrument.get('audioNode');
+    const release = audioNode.get('envelope').release;
+    if (e.totalPlaying === 0) {
+      this.props.instrument.getIn(['lfoGain']).gain.linearRampToValueAtTime(0, release);
+      this.props.instrument.getIn(['lfo1Gain']).gain.linearRampToValueAtTime(0, release);
+      this.props.instrument.getIn(['lfo', 'tone']).stop(release);
+      this.props.instrument.getIn(['lfo1', 'tone']).stop(release);
+    }
+    audioNode.triggerRelease(e.name);
   }
   render() {
-    const { classes, children, path, audioNode, setEffect } = this.props;
-    const { instrument, node } = this.state;
-    const instrumentId = audioNode.get('id');
-    const filter = audioNode.get('filter');
-    const lfo = audioNode.get('lfo');
-    const lfo1 = audioNode.get('lfo1');
-    console.log(lfo);
+    const { classes, children, path, setEffect, instrument } = this.props;
+    const instrumentId = instrument.get('id');
+    const filter = instrument.get('filter');
+    const lfo = instrument.get('lfo');
+    const lfo1 = instrument.get('lfo1');
+    const audioNode = instrument.get('audioNode');
     return (
-      <InstrumentContext.Provider value={this.state}>
+      <InstrumentContext.Provider value={this.props}>
         <PageContainer>
           <Grid container spacing={1}>
             <Switch>
@@ -93,21 +112,26 @@ class Instrument extends React.PureComponent {
                 path={`${path}/instrument`}
                 render={() => (
                   <>
-                    <Envelope label="Carrier Envelope" name="envelope" />
-                    <Oscillator label="Carrier Oscillator" name="oscillator" />
-                    <Envelope label="Modulation Envelope" name="modulationEnvelope" />
-                    <Oscillator label="Modulation Oscillator" name="modulation" />
-                    <Lfo label="Lfo (Cutoff)" name="lfo" preset={lfo.get('preset')} setValue={setEffect(instrumentId, 'lfo')(lfo.get('preset'), lfo.get('tone'))} />
-                    <Lfo label="Lfo (Q)" name="lfo" preset={lfo1.get('preset')} setValue={setEffect(instrumentId, 'lfo1')(lfo1.get('preset'), lfo1.get('tone'))} />
+                    <SynthComponents synthComponents={instrument.get('synthComponents')} />
+                    <Lfo label="Lfo (Cutoff)" name="lfo" preset={lfo.get('preset')} setValue={setEffect(instrumentId, ['lfo'])(lfo.get('preset'), lfo.get('tone'))} />
+                    <Lfo label="Lfo (Q)" name="lfo" preset={lfo1.get('preset')} setValue={setEffect(instrumentId, ['lfo1'])(lfo1.get('preset'), lfo1.get('tone'))} />
                     <BaseCard label="Filter">
-                      <Filter preset={filter.get('preset')} tone={filter.get('tone')} setEffect={setEffect(instrumentId, 'filter')(filter.get('preset'), filter.get('tone'))} />
+                      <Filter preset={filter.get('preset')} tone={filter.get('tone')} setEffect={setEffect(instrumentId, ['filter'])(filter.get('preset'), filter.get('tone'))} />
                     </BaseCard>
                   </>
                 )}
               />
-              <Route exact path={`${path}/effects`} render={() => (
-                <EffectChain instrumentId={instrumentId} inputNode={node} outputNode={this.props.output} />
-              )} />
+              <Route
+                exact
+                path={`${path}/effects`}
+                render={() => (
+                  <EffectChain
+                    instrumentId={instrumentId}
+                    inputNode={audioNode}
+                    outputNode={this.props.output}
+                  />
+                )}
+              />
               <Redirect to={`${path}/instrument`} />
             </Switch>
             <Grid item xs={12}>
@@ -115,8 +139,13 @@ class Instrument extends React.PureComponent {
                 <div>
                   <Visualization source={this.props.output} />
                 </div>
-                <SliderWithLabel onChange={(e, value) => {this.setInstrument({ portamento: value });node.portamento = value;}} min={0} max={0.3} step={0.01} label="Portamento" value={instrument.preset.portamento} />
-                <KeyBoard polyphonic={instrument.polyphonic} noteOff={this.noteOff} noteOn={this.noteOn} />
+                <Grid container spacing={1}>
+                  <SliderComponents
+                    instrument={instrument}
+                    updateInstrument={this.props.updateInstrument}
+                  />
+                </Grid>
+                <KeyBoard polyphonic={instrument.get('voices')} noteOff={this.noteOff} noteOn={this.noteOn} />
               </Paper>
             </Grid>
           </Grid>

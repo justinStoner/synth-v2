@@ -6,15 +6,12 @@ import { withPartialInstrumentContext } from '../../../context/InstrumentContext
 import { setPartialCount, setBaseType, setHarmonicity  } from './utils';
 import { Osc } from './Osc';
 
-export const AM = ({ oscillator, setValue }) => {
-  const { baseType, partialCount, modulationType, harmonicity } = oscillator.preset;
-  return (
+export const AM = ({ preset, setValue }) => (
     <>
-      <Osc oscillator={oscillator} setValue={setValue} />
-      <FullWidthSelect items={waveFormsDropdownItems} label="Modulation Type" value={modulationType} onChange={setValue('modulationType', setBaseType)} />
-      <SliderWithLabel onChange={setValue('harmonicity', setHarmonicity)} label="Harmonicity" value={harmonicity} min={0} max={5} step={0.05} />
+      <Osc preset={preset} setValue={setValue} />
+      <FullWidthSelect items={waveFormsDropdownItems} label="Modulation Type" value={preset.get('modulationType')} onChange={setValue('modulationType', setBaseType)} />
+      <SliderWithLabel onChange={setValue('harmonicity', setHarmonicity)} label="Harmonicity" value={preset.get('harmonicity')} min={0} max={5} step={0.05} />
     </>
-  )
-};
+);
 
 export default AM;

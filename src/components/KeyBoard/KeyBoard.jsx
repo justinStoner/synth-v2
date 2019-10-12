@@ -30,18 +30,28 @@ class KeyBoard extends React.PureComponent {
   static defaultProps = {
     rootOctave: 3,
     octaves: 4,
-    polyphonic: false,
+    polyphonic: 1,
   }
-  constructor (props) {
+  constructor(props) {
     super(props);
+    this.state = {
+      octaves: this.setOctaves(),
+      activeNotes: {},
+      totalPlaying: 0,
+    }
     this.computerKeyboard = new AudioKeys({ polyphonic: props.polyphonic });
     this.computerKeyboard.down(e => {
       resume()
-      this.noteon(Object.assign({}, e, { midi: e.note }));
+      this.noteOn(Object.assign({}, e, { midi: e.note }));
     });
     this.computerKeyboard.up(e => {
-      this.noteoff(Object.assign({}, e, { midi: e.note }));
+      this.noteOff(Object.assign({}, e, { midi: e.note }));
     })
+  }
+
+  componentWillUnmount() {
+    this.computerKeyboard._listeners = {};
+    delete this.computerKeyboard;
   }
 
   getNoteByTouchId = id => {
@@ -78,27 +88,43 @@ class KeyBoard extends React.PureComponent {
     // })
   }
 
-  noteon(e){
-    const octaveNumber = Math.floor(e.midi / 12);
-    this.props.noteOn(Object.assign({}, e, { name: fromMidi(e.midi) }))
+  setOctaves() {
+    const octaves = []
+    for (let i = this.props.rootOctave; i < this.props.rootOctave + this.props.octaves; i++){
+      octaves.push(i)
+    }
+
+    return octaves;
   }
 
-  noteoff(e){
+  setActiveNote = note => {
+    const { activeNotes, totalPlaying } = this.state;
+    this.setState({ totalPlaying: activeNotes[note] ? totalPlaying - 1 : totalPlaying  + 1, activeNotes: Object.assign({}, activeNotes, { [note]: activeNotes[note] ? undefined : true }) })
+  }
+
+  noteOn = e => {
     const octaveNumber = Math.floor(e.midi / 12);
-    this.props.noteOff(Object.assign({}, e, { name: fromMidi(e.midi) }));
+    const name = fromMidi(e.midi);
+    this.setActiveNote(e.note)
+    this.props.noteOn(Object.assign({}, e, { name, totalPlaying: this.state.totalPlaying }))
+  }
+
+  noteOff = e => {
+    const octaveNumber = Math.floor(e.midi / 12);
+    this.setActiveNote(e.note)
+    this.props.noteOff(Object.assign({}, e, { name: fromMidi(e.midi), totalPlaying: this.state.totalPlaying }));
   }
 
   render(){
-    const octaves = []
+    const { octaves, activeNotes } = this.state;
     const { rootOctave, classes } = this.props;
-    for (let i = rootOctave; i < rootOctave + this.props.octaves; i++){
-      octaves.push(i)
-    }
     return(
       <div className={classes.container}
         onTouchMove={this.touchmove}
         onTouchEnd={this.touchend}>
-        {octaves.map(o => <div key={o} className={classes.octaveContainer}><Octave octave={o} /></div>)}
+        {octaves.map(o => <div key={o} className={classes.octaveContainer}>
+          <Octave octave={o} setActiveNote={this.setActiveNote} activeNotes={activeNotes} noteOn={this.noteOn} noteOff={this.noteOff} />
+        </div>)}
       </div>
     );
   }

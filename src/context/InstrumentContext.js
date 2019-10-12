@@ -1,35 +1,38 @@
 import React from 'react';
+import { Map } from 'immutable';
 import withContextFactory from './withContextFactory';
 
 const InstrumentContext = React.createContext({
   audioNode: {},
   instrument: {},
-  setInstrument: () => {},
+  updateInstrument: () => {},
 });
 
 export default InstrumentContext;
 
 export const withInstrumentContext = withContextFactory(InstrumentContext, 'instrumentContext');
 
-export const withPartialInstrumentContext = (Component, nameToMapTo) => withInstrumentContext(({ name, instrumentContext, ...rest }) => {
-  const { instrument, setInstrument, audioNode, node: instrumentNode } = instrumentContext;
-  const node = instrumentNode.voices[0][name];
+export const withPartialInstrumentContext = Component => withInstrumentContext(({ parent, name, instrumentContext, ...rest }) => {
+  const { instrument, updateInstrument } = instrumentContext;
+  const audioNode = instrument.get('audioNode');
+  const node = audioNode.voices ?
+    (parent ? audioNode.voices[0][parent][name] : audioNode.voices[0][name]) :
+    audioNode[name];
+  const presetPath = parent ? ['preset', parent, name] : ['preset', name]
   const partialContext = {
-    [nameToMapTo]: {
-      node,
-      preset: instrument.preset[name],
-      displayName: instrument.displayName,
-    },
+    audioNode: node,
+    preset: instrument.getIn(presetPath),
+    displayName: instrument.get('displayName'),
     setValue: (valueName, setToneInstrument, setExtraValues) => (event, value) => {
       const val = event.target.value || value;
       const extraValues = setExtraValues ? setExtraValues(instrument.preset.name, val) : {};
-      console.log(val, setInstrument);
-      setInstrument({ [name]: Object.assign({}, instrument.preset[name], { [valueName]: val, ...extraValues }) });
+      updateInstrument(presetPath, Map({ [valueName]: val, ...extraValues }))
       // setToneInstrument && setToneInstrument(node, event.target.value || value, valueName, instrument.preset[name])
-      instrumentNode.set({ [name]: { [valueName]: val } })
+      const nodeValue = { [name]: { [valueName]: val } };
+      audioNode.set(parent ? { [parent]: nodeValue } : nodeValue)
     },
-    setInstrument,
-    setPreset: params => setInstrument({ [name]: params }),
+    updateInstrument,
+    setPreset: params => updateInstrument(presetPath, params),
   };
   return (
     <Component {...partialContext}  {...rest} name={name} />
