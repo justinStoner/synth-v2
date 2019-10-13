@@ -57,13 +57,13 @@ export const SliderWithLabel = React.memo(({ label, smallDropdown, value, contai
       onSubmit={e => {
         e.preventDefault();
         const value = clamp(e.nativeEvent.target[0].value);
-        console.log(value);
         onChange({ target: { value } }, value);
       }}
     >
       <Input
         className={classes.shrink}
         defaultValue={value}
+        key={value}
         name="input"
         onBlur={({ target }) => {
           const value = clamp(target.value, min, max);

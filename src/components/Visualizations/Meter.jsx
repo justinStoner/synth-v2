@@ -3,6 +3,9 @@ import Tone from 'tone';
 import { withAudioContext } from '../../context/AudioContext';
 import { withTheme } from '@material-ui/styles';
 import { withStyles, InputLabel } from '@material-ui/core';
+import yellow from '@material-ui/core/colors/yellow';
+import green from '@material-ui/core/colors/green';
+import orange from '@material-ui/core/colors/orange';
 
 const styles = theme => ({
   level: {
@@ -55,6 +58,7 @@ class Meter extends React.PureComponent {
   getWidth = () => this.canvasRef.current.width
 
   loop(){
+    const { theme } = this.props;
     this.animId = requestAnimationFrame(this.loop.bind(this))
     const canvas = this.canvasRef.current;
     const context = canvas.getContext('2d');
@@ -68,9 +72,11 @@ class Meter extends React.PureComponent {
     const barWidth = this.props.barWidth || width / this.meters.length
     context.fillStyle = this.color
     const margin = this.meters.length > 1 ? 3 : 0
+    const gradient = context.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(1, green['A700']);
+    gradient.addColorStop(0, yellow['500']);
+    context.fillStyle = gradient;
     barHeights.forEach((barHeight, i) => {
-      const hue = parseInt(120 * (1 - ((barHeight * 7) / 255)), 10);
-      context.fillStyle = 'hsl(' + hue + ',75%,50%)';
       context.fillRect(i * barWidth + margin*i, height - barHeight, barWidth - margin, barHeight)
     });
     if (this.props.showLabels){

@@ -109,6 +109,7 @@ const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
                   />
                 ))
               }
+              { route.sideNavSection && <route.sideNavSection />}
             </React.Fragment>
           ))
         }

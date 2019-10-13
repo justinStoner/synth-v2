@@ -1,8 +1,8 @@
 import React from 'react';
 import Tone from 'tone';
-import { OrderedMap, Map, List } from 'immutable';
+import { OrderedMap, Map, List, Record } from 'immutable';
 import withContextFactory from './withContextFactory';
-import instrumentPresets, { tonePresets } from '../containers/Synth/presets';
+import instrumentPresets, { tonePresets, instrumentNames } from '../containers/Synth/presets';
 import { effectPresetsList, createLfo, effectPresets } from '../components/EffectChain/presets';
 import TestSynth from '../containers/Synth/customSynths/TestSynth';
 
@@ -22,7 +22,23 @@ const AudioContext = React.createContext({
   moveNode: () => {},
   addEffect: () => {},
   setEffect: () => {},
+  setSelectedInstrument: () => {},
+  setTrackData: () => {},
+  setIsPlaying: () => {},
+  selectedInstrument: 'DuoSynth',
+  tracks: List(),
 });
+
+const Track = new Record({
+  volume: 0,
+  pan: 0,
+  mute: false,
+  solo: false,
+  name: '',
+  displayName: '',
+  recording: false,
+  audioData: null,
+})
 
 export class AudioContextContainer extends React.Component {
 
@@ -30,6 +46,8 @@ export class AudioContextContainer extends React.Component {
     super(props);
     this.state = {
       context,
+      tracks: List(instrumentNames.map(i => new Track({ name: i.value, displayName: i.label }))),
+      selectedInstrument: 'DuoSynth',
       instruments: Map({
         AMSynth: Map({
           name: 'AMSynth',
@@ -44,6 +62,7 @@ export class AudioContextContainer extends React.Component {
           lfo1Gain: new Tone.Gain({ gain: 0 }),
           filter: effectPresets.filter(),
           instrumentOut: new Tone.Gain(),
+          channelOut: new Tone.Channel(),
           voices: 4,
           sliderComponents: List([
             {
@@ -97,6 +116,7 @@ export class AudioContextContainer extends React.Component {
           lfo1Gain: new Tone.Gain({ gain: 0 }),
           filter: effectPresets.filter(),
           instrumentOut: new Tone.Gain(),
+          channelOut: new Tone.Channel(),
           voices: 4,
           sliderComponents: List([
             {
@@ -157,6 +177,7 @@ export class AudioContextContainer extends React.Component {
           lfo1Gain: new Tone.Gain({ gain: 0 }),
           filter: effectPresets.filter(),
           instrumentOut: new Tone.Gain(),
+          channelOut: new Tone.Channel(),
           voices: 1,
           monophonic: true,
           sliderComponents: List([
@@ -196,6 +217,7 @@ export class AudioContextContainer extends React.Component {
           lfo1Gain: new Tone.Gain({ gain: 0 }),
           filter: effectPresets.filter(),
           instrumentOut: new Tone.Gain(),
+          channelOut: new Tone.Channel(),
           voices: 4,
           sliderComponents: List([
             {
@@ -315,6 +337,7 @@ export class AudioContextContainer extends React.Component {
           ]),
         }),
       }),
+      isPlaying: false,
       output: Tone.Master,
       setInstrument: this.setInstrument,
       updateInstrument: this.updateInstrument,
@@ -326,6 +349,9 @@ export class AudioContextContainer extends React.Component {
       moveNode: this.moveNode,
       addEffect: this.addEffect,
       setEffect: this.setEffect,
+      setSelectedInstrument: this.setSelectedInstrument,
+      setTrackData: this.setTrackData,
+      setIsPlaying: this.setIsPlaying,
     }
   }
 
@@ -335,9 +361,22 @@ export class AudioContextContainer extends React.Component {
     this.setState({ instruments: this.state.instruments.setIn([instrumentName, ...fieldNames, 'preset', valueName], val) });
   }
 
+  setIsPlaying = () => {
+    const isPlaying = !this.state.isPlaying;
+    this.setState({ isPlaying })
+  }
+
+  setTrackData = (index, field, data) => {
+    console.log(index, field, data);
+    this.setState({ tracks: this.state.tracks.setIn([index, field], data) })
+    console.log(this.state.tracks.get(index));
+  }
+
   setInstrument = (instrumentName, instrument) => {
     this.setState({ instruments: this.state.instruments.set(instrumentName, instrument) })
   }
+
+  setSelectedInstrument = selectedInstrument => { this.setState({ selectedInstrument })}
 
   getInputNode = (instrumentName, index) => index === 0 ? this.getInstrumentOut(instrumentName) : this.state.instruments.getIn([instrumentName, 'effects', index -1, 'tone'])
 
@@ -374,7 +413,6 @@ export class AudioContextContainer extends React.Component {
   disconnectNode = (instrumentName, index, dispose = true, connectToOutput = true) => {
     const inputNode = this.getInputNode(instrumentName, index);
     const tone = this.getTone(instrumentName, index);
-    console.log(index, inputNode, tone)
     inputNode.disconnect(tone);
     if (connectToOutput) {
       inputNode.connect(this.getOutputNode(instrumentName, index))
@@ -421,7 +459,7 @@ export class AudioContextContainer extends React.Component {
       const filter = i.getIn(['filter', 'tone']);
       const lfo = i.getIn(['lfo', 'tone']);
       const lfo1 = i.getIn(['lfo1', 'tone']);
-      i.get('audioNode').chain(filter, i.get('instrumentOut'), ...i.get('effects').map(effect => effect.get('tone')), this.state.output);
+      i.get('audioNode').chain(filter, i.get('instrumentOut'), ...i.get('effects').map(effect => effect.get('tone')), i.get('channelOut'), this.state.output);
       lfo.chain(i.get('lfoGain'), filter.frequency);
       lfo1.connect(i.get('lfo1Gain'), filter.Q);
     })

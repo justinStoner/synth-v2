@@ -74,9 +74,12 @@ const Header = ({ appLayoutContext, history, audioContext }) => {
               <>
                 <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                   <Switch>
-                    {route.subItems.map(item => (
+                    {route.subItems && route.subItems.map(item => (
                       <Route key={item.route} path={item.route} render={() => (<div>{item.name}</div>)} />
                     ))}
+                    <Route>
+                      {route.header}
+                    </Route>
                   </Switch>
                 </Typography>
                 {
@@ -86,8 +89,12 @@ const Header = ({ appLayoutContext, history, audioContext }) => {
                         {route.tabs.map(tab => (
                           <Tab classes={{ root: classes.tabsRoot }} label={tab.label} value={`${location.pathname.substring(0, location.pathname.lastIndexOf('/'))}${tab.route}`} key={tab.label} />
                         ))}
-                      </Tabs>)}
+                      </Tabs>)
+                    }
                   </RouterContext.Consumer>
+                }
+                {
+                  route.toolbarComponent && <route.toolbarComponent />
                 }
               </>
             )}

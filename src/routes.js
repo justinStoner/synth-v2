@@ -1,6 +1,9 @@
 import React from 'react';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import Audiotrack from '@material-ui/icons/Audiotrack';
 import Synth from './containers/Synth';
+import Recording from './containers/Recording';
+import HeaderControls from './containers/Recording/HeaderControls'
 
 export default [
   {
@@ -38,5 +41,14 @@ export default [
     component: Synth,
     exact: false,
     tabs: [{ label: 'Instrument', route: '/instrument' }, { label: 'Effects', route: '/effects' }],
+  },
+  {
+    header: 'Tracks',
+    name: 'Tracks',
+    route: '/tracks',
+    component: Recording,
+    toolbarComponent: HeaderControls,
+    exact: false,
+    icon: <Audiotrack />,
   },
 ];

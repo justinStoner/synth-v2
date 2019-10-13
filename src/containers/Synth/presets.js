@@ -77,6 +77,15 @@ export const envelopePresets = [
     release: 0.4,
     releaseCurve: envelopeCurves.bounce,
   }),
+  Map({
+    attack: 0.25,
+    attackCurve: envelopeCurves.bounce,
+    decay: 0,
+    decayCurve: decayCurves.linear,
+    sustain: 1,
+    release: 1,
+    releaseCurve: envelopeCurves.bounce,
+  }),
 ];
 
 export const freqEnvelopePresets = [
@@ -86,7 +95,7 @@ export const freqEnvelopePresets = [
     decay: 0,
     decayCurve: decayCurves.linear,
     sustain: 1,
-    release: 0.4,
+    release: 1,
     releaseCurve: envelopeCurves.cosine,
     baseFrequency: 200,
     octaves: 2,
@@ -98,10 +107,10 @@ export const freqEnvelopePresets = [
     decay: 0,
     decayCurve: decayCurves.linear,
     sustain: 1,
-    release: 0.4,
+    release: 1,
     releaseCurve: envelopeCurves.bounce,
     baseFrequency: 200,
-    octaves: 3,
+    octaves: 2,
     exponent: 1,
   }),
 ]
@@ -148,20 +157,39 @@ const presets = {
         portamento: 0.1,
         oscillator: oscillatorPresets.fat[0],
         filterEnvelope: freqEnvelopePresets[0],
-        envelope: envelopePresets[0],
+        envelope: envelopePresets[2],
       }),
       voice1: Map({
         volume: -10,
         portamento: 0.1,
         oscillator: oscillatorPresets.osc[1],
         filterEnvelope: freqEnvelopePresets[1],
-        envelope: envelopePresets[0],
+        envelope: envelopePresets[2],
       }),
     }),
   ],
 }
 
 export default presets;
+
+export const instrumentNames = [
+  {
+    label: 'AM Synth',
+    value: 'AMSynth',
+  },
+  {
+    label: 'FM Synth',
+    value: 'FMSynth',
+  },
+  {
+    label: 'Pluck Synth',
+    value: 'PluckSynth',
+  },
+  {
+    label: 'Duo Synth',
+    value: 'DuoSynth',
+  },
+]
 
 const convertToTonePreset = preset => preset.map(p => {
   const pJS = p.toJS();
