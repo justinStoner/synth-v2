@@ -9,6 +9,7 @@ import Header from './components/AppLayout/Header';
 import SideNav from './components/AppLayout/SideNav';
 import { AudioContextContainer } from './context/AudioContext'
 import routes from './routes';
+import 'react-virtualized/styles.css';
 
 const theme = createMuiTheme({
   palette: {
@@ -32,7 +33,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   return (
     <MuiThemeProvider theme={theme}>
       <AppLayoutContext.Provider value={{ open, setOpen }}>

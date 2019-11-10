@@ -47,10 +47,7 @@ class Octave extends React.Component {
   }
 
   getNoteByTouchId = id => {
-    const element = Array.from(this.shadowRoot.querySelectorAll('tone-keyboard-note')).find(e => e.touchid === id)
-    if (element && element.note){
-      return element
-    }
+
   }
 
   render(){

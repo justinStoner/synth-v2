@@ -76,9 +76,9 @@ const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
   const { open, setOpen } = appLayoutContext;
   return (
     <Drawer
-      variant="permanent"
+      variant="persistent"
       classes={{
-        paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+        paper: clsx(open && classes.drawerPaper),
       }}
       open={open}
     >

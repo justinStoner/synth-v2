@@ -81,7 +81,7 @@ class Track extends PureComponent {
         <Grid item xs={2}>
           <Paper className={classes.paper}>
             <Typography component="body2" color="inherit" noWrap>
-              {track.get('name')}
+              {track.get('title')}
               <Meter style={{ padding: '0px 6px', display: 'inline-block' }} barWidth={9} input={track.name} height={14} width={14} />
             </Typography>
             <div>

@@ -2,7 +2,7 @@ import React from 'react';
 import withContextFactory from './withContextFactory';
 
 const AppLayoutContext = React.createContext({
-  open: true,
+  open: false,
   setOpen: () => {},
   route: '/',
   setRoute: () => {},
