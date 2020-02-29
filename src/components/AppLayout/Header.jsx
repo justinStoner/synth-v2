@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import clsx from 'clsx';
 import { Route, Switch } from 'react-router-dom';
 import { __RouterContext as RouterContext } from 'react-router';
@@ -14,6 +15,7 @@ import { drawerWidth } from './constants';
 import { withAppLayoutContext } from '../../context/AppLayout';
 import routes from '../../routes';
 import { withAudioContext } from '../../context/AudioContext';
+import { selectInstruments } from '../../store/instruments/selectors';
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -51,7 +53,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const Header = ({ appLayoutContext, history, audioContext }) => {
+const Header = ({ appLayoutContext, history, instruments }) => {
   const classes = useStyles();
   const { open, setOpen } = appLayoutContext;
   return (
@@ -74,8 +76,8 @@ const Header = ({ appLayoutContext, history, audioContext }) => {
               <>
                 <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                   <Switch>
-                    {route.subItems && route.subItems.map(item => (
-                      <Route key={item.route} path={item.route} render={() => (<div>{item.name}</div>)} />
+                    {route.getSubItems && route.getSubItems({ instruments }).map(item => (
+                      <Route key={item.path} path={item.path} render={() => (<div>{item.name}</div>)} />
                     ))}
                     <Route>
                       {route.header}
@@ -105,4 +107,8 @@ const Header = ({ appLayoutContext, history, audioContext }) => {
   )
 }
 
-export default withAppLayoutContext(withAudioContext(Header));
+const mapStateToProps = state => ({
+  instruments: selectInstruments(state),
+})
+
+export default withAppLayoutContext(connect(mapStateToProps)(Header));

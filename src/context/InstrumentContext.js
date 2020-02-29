@@ -13,8 +13,8 @@ export default InstrumentContext;
 export const withInstrumentContext = withContextFactory(InstrumentContext, 'instrumentContext');
 
 export const withPartialInstrumentContext = Component => withInstrumentContext(({ parent, name, instrumentContext, ...rest }) => {
-  const { instrument, updateInstrument } = instrumentContext;
-  const audioNode = instrument.get('audioNode');
+  const { instrument, updateInstrument, audioInstrument } = instrumentContext;
+  const audioNode = audioInstrument.instrument;
   const node = audioNode.voices ?
     (parent ? audioNode.voices[0][parent][name] : audioNode.voices[0][name]) :
     audioNode[name];

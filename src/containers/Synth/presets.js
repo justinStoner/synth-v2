@@ -189,6 +189,11 @@ export const instrumentNames = [
     label: 'Duo Synth',
     value: 'DuoSynth',
   },
+  {
+    label: 'Sequencer',
+    value: 'sequencer',
+    type: 'seqencer',
+  },
 ]
 
 const convertToTonePreset = preset => preset.map(p => {

@@ -6,6 +6,8 @@ import { withStyles, InputLabel } from '@material-ui/core';
 import yellow from '@material-ui/core/colors/yellow';
 import green from '@material-ui/core/colors/green';
 import orange from '@material-ui/core/colors/orange';
+import { connect } from 'react-redux';
+import { selectInstruments, selectAudioInstruments } from '../../store/instruments/selectors';
 
 const styles = theme => ({
   level: {
@@ -20,9 +22,8 @@ class Meter extends React.PureComponent {
   static defaultProps = {
     stereo: true,
     showLabels: false,
+    color: 'rgba(0, 0, 0, 0.54)',
   }
-
-  color = 'rgba(0, 0, 0, 0.54)'
 
   async componentDidMount() {
     this.loop()
@@ -37,7 +38,7 @@ class Meter extends React.PureComponent {
         [],
     }
     const channels = props.stereo ? 2 : 1
-    const audioNode = props.audioContext.instruments.getIn([props.input, 'instrumentOut']);
+    const audioNode = props.instruments.getIn([props.input, 'instrumentOut']);
     if (props.stereo){
       const split = new Tone.Split()
       audioNode.connect(split)
@@ -70,14 +71,15 @@ class Meter extends React.PureComponent {
     const barHeights = values.map(value => Math.clamp(Math.scale(value, -100, 6, 0, height), 0, height))
     context.clearRect(0, 0, width, height)
     const barWidth = this.props.barWidth || width / this.meters.length
-    context.fillStyle = this.color
     const margin = this.meters.length > 1 ? 3 : 0
     const gradient = context.createLinearGradient(0, 0, 0, height);
     gradient.addColorStop(1, green['A700']);
     gradient.addColorStop(0, yellow['500']);
-    context.fillStyle = gradient;
     barHeights.forEach((barHeight, i) => {
-      context.fillRect(i * barWidth + margin*i, height - barHeight, barWidth - margin, barHeight)
+      context.fillStyle = this.props.color;
+      context.fillRect(i * barWidth + margin * i, 0, barWidth - margin, height)
+      context.fillStyle = gradient;
+      context.fillRect(i * barWidth + margin*i, height - barHeight, barWidth - margin, barHeight);
     });
     if (this.props.showLabels){
       this.setState({ levels: this.state.levels.map((val, i) => values[i] < -100 ? -Infinity.toFixed(2) : values[i].toFixed(2)) })
@@ -118,4 +120,8 @@ class Meter extends React.PureComponent {
 
 }
 
-export default withTheme(withStyles(styles)(withAudioContext(Meter)));
+const mapStateToProps = state => ({
+  instruments: selectAudioInstruments(state),
+})
+
+export default withTheme(withStyles(styles)(connect(mapStateToProps)(Meter)));

@@ -1,0 +1,1 @@
+export const selectSavedSongs = state => state.savedSongs.songs;

@@ -1,21 +1,17 @@
 import React from 'react';
 import PT from 'prop-types';
-import Tone from 'tone';
 import clsx from 'clsx';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
+import * as acetone from '../../assets/audio/acetone-rhythm';
 import { withStyles } from '@material-ui/core';
-import { Route, Switch, Redirect } from 'react-router-dom';
 import Envelope from '../../components/AudioNodes/Envelope';
 import Oscillator from '../../components/AudioNodes/Oscillator';
-import PageContainer from '../PageContainer';
 import InstrumentContext from '../../context/InstrumentContext';
 import KeyBoard from '../KeyBoard/KeyBoard';
-import { instrumentPresets } from '../../containers/Synth/presets';
 import EffectChain from '../EffectChain';
 import Visualization from './Visualization';
 import { SliderWithLabel } from '../Slider';
-import routes from '../../routes';
 import BaseCard from '../AudioNodes/BaseCard';
 import Filter from '../AudioNodes/Filter';
 import Lfo from '../AudioNodes/Lfo';
@@ -35,14 +31,14 @@ const styles = theme => ({
   },
 });
 
-const SynthComponents = React.memo(({ synthComponents }) => (
+export const SynthComponents = React.memo(({ synthComponents, EnvelopeComponent = Envelope, OscillatorComponent = Oscillator }) => (
   <>
-    {synthComponents && synthComponents.valueSeq().map((props, index) => props.component === 'envelope' ? <Envelope {...props} key={props.name + index} /> : <Oscillator {...props} key={props.name + index} />)}
+    {synthComponents && synthComponents.valueSeq().map((props, index) => props.component === 'envelope' ? <EnvelopeComponent {...props} key={props.name + index} /> : <OscillatorComponent {...props} key={props.name + index} />)}
   </>
 ));
 SynthComponents.displayName = 'SynthComponents';
 
-const SliderComponents = React.memo(({ updateInstrument, instrument }) => {
+export const SliderComponents = React.memo(({ updateInstrument, instrument }) => {
   const sliderComponents = instrument.get('sliderComponents');
   return (
     <>
@@ -74,84 +70,107 @@ class Instrument extends React.PureComponent {
   }
 
   noteOn = e => {
-    const audioNode = this.props.instrument.get('audioNode');
-    const attack = audioNode.get('envelope').attakc;
+    const { instrument, lfo, lfo1, lfoGain, lfo1Gain } = this.props.audioInstrument;
+    const attack = instrument.get('envelope').attack;
     if (e.totalPlaying === 1) {
-      this.props.instrument.getIn(['lfo', 'tone']).start();
-      this.props.instrument.getIn(['lfo1', 'tone']).start();
-      this.props.instrument.getIn(['lfoGain']).gain.linearRampToValueAtTime(1, attack);
-      this.props.instrument.getIn(['lfo1Gain']).gain.linearRampToValueAtTime(1, attack);
+      lfo.start();
+      lfo1.start();
+      lfoGain.gain.linearRampToValueAtTime(1, attack);
+      lfo1Gain.gain.linearRampToValueAtTime(1, attack);
     }
-    audioNode.triggerAttack(e.name, undefined, e.velocity);
+    instrument.triggerAttack(e.name, undefined, e.velocity);
   }
   noteOff = e => {
-    const audioNode = this.props.instrument.get('audioNode');
-    const release = audioNode.get('envelope').release;
+    const { instrument, lfo, lfo1, lfoGain, lfo1Gain } = this.props.audioInstrument;
+    const release = instrument.get('envelope').release;
     if (e.totalPlaying === 0) {
-      this.props.instrument.getIn(['lfoGain']).gain.linearRampToValueAtTime(0, release);
-      this.props.instrument.getIn(['lfo1Gain']).gain.linearRampToValueAtTime(0, release);
-      this.props.instrument.getIn(['lfo', 'tone']).stop(release);
-      this.props.instrument.getIn(['lfo1', 'tone']).stop(release);
+      lfoGain.gain.linearRampToValueAtTime(0, release);
+      lfo1Gain.gain.linearRampToValueAtTime(0, release);
+      lfo.stop(release);
+      lfo1.stop(release);
     }
-    audioNode.triggerRelease(e.name);
+    instrument.triggerRelease(e.name);
   }
   render() {
-    const { classes, children, path, setEffect, instrument } = this.props;
+    const { classes, setEffect, instrument, audioInstrument } = this.props;
     const instrumentId = instrument.get('id');
     const filter = instrument.get('filter');
     const lfo = instrument.get('lfo');
     const lfo1 = instrument.get('lfo1');
-    const audioNode = instrument.get('audioNode');
+    const synthProps = {
+      synthComponents: instrument.get('synthComponents'),
+    };
+    const lfoProps = {
+      label: 'Lfo (Cutoff)',
+      name: 'lfo',
+      preset: lfo.get('preset'),
+      setValue: setEffect(instrumentId, ['lfo'])(lfo.get('preset'), audioInstrument.lfo),
+    };
+    const lfo1Props = {
+      label: 'Lfo (Q)',
+      name: 'lfo',
+      preset: lfo1.get('preset'),
+      setValue: setEffect(instrumentId, ['lfo1'])(lfo1.get('preset'), audioInstrument.lfo1),
+    };
+    const filterProps = {
+      preset: filter.get('preset'),
+      tone: audioInstrument.filter,
+      setEffect: setEffect(instrumentId, ['filter'])(filter.get('preset'), audioInstrument.filter),
+    };
+
+    const effectProps = {
+      instrumentId,
+      inputNode: audioInstrument.instrumentOut,
+      outputNode: audioInstrument.channelOut,
+      setEffect,
+      effectChain: instrument.get('effects'),
+      effectChainNodes: audioInstrument.effects,
+    }
+
+    const synthComponents = (
+      <>
+        <SynthComponents {...synthProps} />
+        <Lfo {...lfoProps} />
+        <Lfo {...lfo1Props} />
+        <BaseCard label="Filter">
+          <Filter {...filterProps} />
+        </BaseCard>
+      </>
+    );
+    const effectComponents = (
+      <EffectChain {...effectProps}/>
+    )
+
+    const synthControls = (
+      <Paper className={clsx(classes.paper, classes.keyboardContainer)}>
+        <div>
+          <Visualization source={audioInstrument.channelOut} />
+        </div>
+        <Grid container spacing={1}>
+          <SliderComponents
+            instrument={instrument}
+            updateInstrument={this.props.updateInstrument}
+          />
+        </Grid>
+        <KeyBoard polyphonic={instrument.get('voices')} noteOff={this.noteOff} noteOn={this.noteOn} />
+      </Paper>
+    )
+
     return (
       <InstrumentContext.Provider value={this.props}>
-        <PageContainer>
-          <Grid container spacing={1}>
-            <Switch>
-              <Route
-                exact
-                path={`${path}/instrument`}
-                render={() => (
-                  <>
-                    <SynthComponents synthComponents={instrument.get('synthComponents')} />
-                    <Lfo label="Lfo (Cutoff)" name="lfo" preset={lfo.get('preset')} setValue={setEffect(instrumentId, ['lfo'])(lfo.get('preset'), lfo.get('tone'))} />
-                    <Lfo label="Lfo (Q)" name="lfo" preset={lfo1.get('preset')} setValue={setEffect(instrumentId, ['lfo1'])(lfo1.get('preset'), lfo1.get('tone'))} />
-                    <BaseCard label="Filter">
-                      <Filter preset={filter.get('preset')} tone={filter.get('tone')} setEffect={setEffect(instrumentId, ['filter'])(filter.get('preset'), filter.get('tone'))} />
-                    </BaseCard>
-                  </>
-                )}
-              />
-              <Route
-                exact
-                path={`${path}/effects`}
-                render={() => (
-                  <EffectChain
-                    instrumentId={instrumentId}
-                    inputNode={audioNode}
-                    outputNode={this.props.output}
-                  />
-                )}
-              />
-              <Redirect to={`${path}/instrument`} />
-            </Switch>
-            <Grid item xs={12}>
-              <Paper className={clsx(classes.paper, classes.keyboardContainer)}>
-                <div>
-                  <Visualization source={this.props.output} />
-                </div>
-                <Grid container spacing={1}>
-                  <SliderComponents
-                    instrument={instrument}
-                    updateInstrument={this.props.updateInstrument}
-                  />
-                </Grid>
-                <KeyBoard polyphonic={instrument.get('voices')} noteOff={this.noteOff} noteOn={this.noteOn} />
-              </Paper>
-            </Grid>
-          </Grid>
-        </PageContainer>
+        {this.props.render({
+          synthComponents,
+          synthControls,
+          effectComponents,
+          synthProps,
+          lfoProps,
+          lfo1Props,
+          filterProps,
+          effectProps,
+        })}
       </InstrumentContext.Provider>
     )
+
   }
 }
 

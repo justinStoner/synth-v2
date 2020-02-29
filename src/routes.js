@@ -8,10 +8,11 @@ import HeaderControls from './containers/Recording/HeaderControls'
 export default [
   {
     header: 'Synthesizers',
-    getSubItems: ({ audioContext, path }) => audioContext.instruments.entrySeq().map(([k, v]) => ({
+    getSubItems: ({ instruments, path }) => instruments.entrySeq().map(([k, v]) => ({
       name: v.get('name'),
-      path: `/${k}`,
-    })),
+      path: `/synth/${k}`,
+      id: v.get('id'),
+    })).toJS(),
     subItems: [
       {
         name: 'Amplitude modulation',

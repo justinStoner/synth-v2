@@ -1,0 +1,1 @@
+export const selectClips = state => state.clips.clips

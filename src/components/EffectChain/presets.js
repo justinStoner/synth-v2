@@ -36,12 +36,21 @@ export const lfoPresets = [
   }),
 ];
 
-export const createLfo = (index = 0) => Map({
-  tone: new Tone.LFO(lfoPresets[index].toJS()),
-  preset: lfoPresets[index],
-  displayName: 'Lfo',
-  id: uuid(),
-  type: 'lfo',
+export const createLfo = (index = 0, id = uuid()) => ({
+  audioState: {
+    effect: new Tone.LFO(lfoPresets[index].toJS()),
+    preset: lfoPresets[index],
+    displayName: 'Lfo',
+    id,
+    type: 'lfo',
+  },
+  uiState: Map({
+    constructor: 'LFO',
+    preset: lfoPresets[index],
+    displayName: 'Lfo',
+    id,
+    type: 'lfo',
+  }),
 });
 
 export const chorusPresets = [
@@ -132,49 +141,105 @@ export const effectMenuItems = [
 ]
 
 export const effectPresets = {
-  reverb: (index = 0) => Map({
-    tone: new Tone.Freeverb(reverbPresets[index].toJS()),
-    preset: reverbPresets[index],
-    displayName: 'Reverb',
-    id: uuid(),
-    type: 'reverb',
+  reverb: (index = 0, id = uuid()) => ({
+    audioState: {
+      effect: Tone.Freeverb,
+      preset: reverbPresets[index],
+      displayName: 'Reverb',
+      id,
+      type: 'reverb',
+    },
+    uiState: Map({
+      constructor: 'Freeverb',
+      preset: reverbPresets[index],
+      displayName: 'Reverb',
+      id,
+      type: 'reverb',
+    }),
   }),
-  chorus: (index = 0) => Map({
-    tone: new Tone.Chorus(chorusPresets[index].toJS()),
-    preset: chorusPresets[index],
-    displayName: 'Chorus',
-    id: uuid(),
-    type: 'chorus',
+  chorus: (index = 0, id = uuid()) => ({
+    audioState: {
+      effect: Tone.Chorus,
+      preset: chorusPresets[index],
+      displayName: 'Chorus',
+      id,
+      type: 'chorus',
+    },
+    uiState: Map({
+      preset: chorusPresets[index],
+      constructor: 'Chorus',
+      displayName: 'Chorus',
+      id,
+      type: 'chorus',
+    }),
   }),
-  phaser: (index = 0) => Map({
-    tone: new Tone.Phaser(phaserPresets[index].toJS()),
-    preset: phaserPresets[index],
-    displayName: 'Phaser',
-    id: uuid(),
-    type: 'phaser',
+  phaser: (index = 0, id = uuid()) => ({
+    audioState: {
+      effect: Tone.Phaser,
+      preset: phaserPresets[index],
+      displayName: 'Phaser',
+      id,
+      type: 'phaser',
+    },
+    uiState: Map({
+      constructor: 'Phaser',
+      preset: phaserPresets[index],
+      displayName: 'Phaser',
+      id,
+      type: 'phaser',
+    }),
   }),
-  delay: (index = 0) => Map({
-    tone: new Tone.FeedbackDelay(delayPresets[index].toJS()),
-    preset: delayPresets[index],
-    displayName: 'Delay',
-    id: uuid(),
-    type: 'delay',
+  delay: (index = 0, id = uuid()) => ({
+    audioState: {
+      effect: Tone.FeedbackDelay,
+      preset: delayPresets[index],
+      displayName: 'Delay',
+      id,
+      type: 'delay',
+    },
+    uiState: Map({
+      preset: delayPresets[index],
+      constructor: 'FeedbackDelay',
+      displayName: 'Delay',
+      id,
+      type: 'delay',
+    }),
   }),
-  filter: (index = 0) => Map({
-    tone: new Tone.Filter(filterPresets[index].toJS()),
-    preset: filterPresets[index],
-    displayName: 'Filter',
-    id: uuid(),
-    type: 'filter',
-    noWet: true,
+  filter: (index = 0, id = uuid()) => ({
+    audioState: {
+      effect: Tone.Filter,
+      preset: filterPresets[index],
+      displayName: 'Filter',
+      id,
+      type: 'filter',
+      noWet: true,
+    },
+    uiState: Map({
+      constructor: 'Filter',
+      preset: filterPresets[index],
+      displayName: 'Filter',
+      id,
+      type: 'filter',
+      noWet: true,
+    }),
   }),
-  compressor: (index = 0) => Map({
-    tone: new Tone.Compressor(compressorPresets[index].toJS()),
-    preset: compressorPresets[index],
-    displayName: 'Compressor',
-    id: uuid(),
-    type: 'compressor',
-    noWet: true,
+  compressor: (index = 0, id = uuid()) => ({
+    audioState: {
+      effect: Tone.Compressor,
+      preset: compressorPresets[index],
+      displayName: 'Compressor',
+      id,
+      type: 'compressor',
+      noWet: true,
+    },
+    uiState: Map({
+      constructor: 'Compressor',
+      preset: compressorPresets[index],
+      displayName: 'Compressor',
+      id,
+      type: 'compressor',
+      noWet: true,
+    }),
   }),
 };
 

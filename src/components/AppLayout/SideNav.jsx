@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import clsx from 'clsx';
 import { withRouter } from 'react-router';
 import { NavLink } from 'react-router-dom';
@@ -16,6 +17,7 @@ import { withAppLayoutContext } from '../../context/AppLayout';
 import routes from '../../routes';
 import Meter from '../Visualizations/Meter';
 import { withAudioContext } from '../../context/AudioContext';
+import { selectInstruments } from '../../store/instruments/selectors';
 
 const useStyles = makeStyles(theme => ({
   drawerPaper: {
@@ -71,7 +73,7 @@ function ListItemLink(props) {
   );
 }
 
-const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
+const SideNav = ({ appLayoutContext, history, match, instruments }) => {
   const classes = useStyles();
   const { open, setOpen } = appLayoutContext;
   return (
@@ -99,13 +101,13 @@ const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
                 <ListItemText primary={route.name} />
               </ListItem>
               {
-                route.subItems && route.subItems.map(item => (
+                route.getSubItems && route.getSubItems({ instruments }).map(item => (
                   <ListItemLink
                     icon={<Meter style={{ padding: '0px 6px' }} barWidth={9} input={item.id} height={14} width={14} />}
                     textClassName={classes.dense}
-                    key={item.route}
+                    key={item.path}
                     secondary={item.name}
-                    to={item.route}
+                    to={item.path}
                   />
                 ))
               }
@@ -118,4 +120,8 @@ const SideNav = ({ appLayoutContext, history, match, audioContext }) => {
   )
 }
 
-export default withAppLayoutContext(withRouter(withAudioContext(SideNav)));
+const mapStateToProps = state => ({
+  instruments: selectInstruments(state),
+})
+
+export default withAppLayoutContext(withRouter(connect(mapStateToProps)(SideNav)));

@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import scrollbarSize from 'dom-helpers/scrollbarSize';
 import { Grid, AutoSizer, ScrollSync } from 'react-virtualized';
 import { withStyles, withTheme } from '@material-ui/core';
-
 const COL_WIDTH = 55;
 const ROW_HEIGHT = 55;
 const TIMELINE_HEIGHT = 20;
@@ -28,6 +28,22 @@ const styles = theme => ({
   leftSideGridContainer: {
     flex: '0 0 75px',
     zIndex: 10,
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
+    overflow: 'hidden',
+  },
+  timeline: {
+    zIndex: 11,
+    position: 'absolute',
+    left: 0,
+    backgroundColor: '#fff',
+    borderBottom: `1px solid ${theme.palette.grey[400]}`,
+    width: '100%',
+  },
+  upperLeftComponent: {
+    position: 'absolute',
+    left: 0,
   },
   leftSideGrid: {
     overflow: 'hidden !important',
@@ -57,13 +73,11 @@ const styles = theme => ({
   },
   measureContainer: {
     overflow: 'hidden !important',
-    position: 'absolute !important',
-    top: 0,
-    left: 0,
+    width: '100%',
   },
   row: {
     height: '100%',
-    padding: `${theme.spacing(0.5)}px 0px`,
+    padding: '0px',
     display: 'inline-block',
   },
   autosizeContainer: {
@@ -96,7 +110,6 @@ const rowItemsRenderer = (items, isVisible, columnWidth, CellRenderer, onItemCli
         SPB={SPB}
         columnWidth={columnWidth}
         stepWidth={columnWidth / SPB}
-        style={{ padding: '8px 0px' }}
         key={i.key} item={i}
         width={width}
         height={rowHeight}
@@ -106,9 +119,19 @@ const rowItemsRenderer = (items, isVisible, columnWidth, CellRenderer, onItemCli
   )
 })
 
-const columnGridWith = (width, groupOffset) => ({ index }) => {
-  if (index === 0) return groupOffset;
-  return COL_WIDTH;
+const columnGridWith = (width, groupOffset, colWidth) => ({ index }) => {
+  if (index === 0) return 0;
+  return colWidth;
+}
+
+const getStepBorder = (theme, columnIndex, parentColumnIndex, BPMe, SPB) => {
+  if (columnIndex === 0 && parentColumnIndex > 0 && parentColumnIndex % BPMe === 0) {
+    return theme.palette.grey[400]
+  }
+  if (columnIndex % SPB === 0) {
+    return theme.palette.grey[300];
+  }
+  return theme.palette.grey[200];
 }
 
 const StepsRender = ({ BPMe, SPB, parentColumnIndex, theme }) => ({ columnIndex, rowIndex, style, classes }) => (
@@ -121,8 +144,8 @@ const StepsRender = ({ BPMe, SPB, parentColumnIndex, theme }) => ({ columnIndex,
     onClick={() => console.log('step clicked')}
     style={{
       ...style,
-      backgroundColor: rowIndex % 2 === 1  ? '#f5f5f5' : '#fff',
-      borderLeft: `1px solid ${columnIndex === 0 && parentColumnIndex > 0 && parentColumnIndex % BPMe === 0 ? theme.palette.grey[500] : theme.palette.grey[300]}`,
+      backgroundColor: theme.palette.grey[100],
+      borderLeft: `1px solid ${getStepBorder(theme, columnIndex, parentColumnIndex, BPMe, SPB)}`,
     }}
   />
 )
@@ -157,13 +180,15 @@ class Timeline extends React.PureComponent {
   }
 
   renderTimeline = ({ columnIndex, style }) => {
-    const { classes, groupOffset, theme, BPMe } = this.props;
+    const { classes, groupOffset, theme, BPMe, colWidth, upperLeftComponent } = this.props;
     return (
       <div
         key={`${columnIndex}measure`}
         className={classes.measure}
         style={{
           ...style,
+          width: columnIndex === 0 ? 0 : colWidth,
+          borderBottom: `1px solid ${this.props.theme.palette.grey[400]}`,
           color: columnIndex > 0 && columnIndex % BPMe === 1 ? theme.palette.primary[500] : theme.palette.text.primary,
         }}
       >
@@ -181,7 +206,7 @@ class Timeline extends React.PureComponent {
         data-column-index={columnIndex}
         style={{
           ...style,
-          width: colWidth,
+          width: columnIndex > 0 ? colWidth : 0,
         }}
       >
         {columnIndex > 0 && <Grid
@@ -214,7 +239,7 @@ class Timeline extends React.PureComponent {
     return (
       <div
         key={`${rowIndex}${columnIndex}row`}
-        style={{ ...style, marginLeft: 115, transform: `translatex(-${scrollLeft}px)` }}
+        style={{ ...style, transform: `translatex(-${scrollLeft}px)`, borderBottom: `1px solid ${this.props.theme.palette.grey[400]}` }}
         data-row-index={rowIndex}
         onClick={e => {onRowClick(e.nativeEvent, rowIndex, group)}}
       >
@@ -236,33 +261,58 @@ class Timeline extends React.PureComponent {
   }
 
   render() {
-    const { classes, groups, items, groupOffset, rowHeight, colWidth, onRowClick, scrollToRow } = this.props;
+    const { classes, groups, items, groupOffset, rowHeight, colWidth, onRowClick, scrollToRow, upperLeftComponent } = this.props;
+    const barSize = scrollbarSize();
     return (
       <div className={classes.container} ref={this.container}>
         <ScrollSync>
-          {({ onScroll, scrollLeft, scrollTop, scrollHeight }) => (
+          {({ onScroll, scrollLeft, scrollTop }) => (
             <div className={classes.wrapper}>
               <div
-                className={classes.leftSideGridContainer}
+                className={classes.timeline}
                 style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: TIMELINE_HEIGHT - scrollTop,
-                  bottom: 0,
-                }}>
+                  height: TIMELINE_HEIGHT,
+                }}
+              >
+                <div style={{ width: groupOffset }} className={classes.upperLeftComponent}>
+                  {upperLeftComponent}
+                </div>
+                <Grid
+                  className={classes.measureContainer}
+                  rowCount={1}
+                  width={(this.container.current && this.container.current.getBoundingClientRect().width) || window.innerWidth }
+                  height={TIMELINE_HEIGHT}
+                  columnWidth={columnGridWith(0, groupOffset, colWidth)}
+                  columnCount={COLS}
+                  rowHeight={TIMELINE_HEIGHT}
+                  cellRenderer={this.renderTimeline}
+                  scrollLeft={scrollLeft}
+                  style={{ left: groupOffset }}
+                />
+              </div>
+              <div
+                className={classes.leftSideGridContainer}
+                style={{ top: 0, width: groupOffset }}
+              >
                 <Grid
                   cellRenderer={this.renderGroup}
                   columnWidth={groupOffset}
                   columnCount={1}
                   className={classes.leftSideGrid}
-                  height={rowHeight * groups.length}
+                  height={(rowHeight * groups.length)}
                   rowHeight={rowHeight}
                   rowCount={groups.length}
                   scrollTop={scrollTop}
                   width={groupOffset}
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: TIMELINE_HEIGHT - scrollTop,
+                    bottom: 0,
+                  }}
                 />
               </div>
-              <div className={classes.autosizeContainer}>
+              <div className={classes.autosizeContainer} style={{ paddingLeft: groupOffset, paddingTop: TIMELINE_HEIGHT }}>
                 <AutoSizer>
                   {({ height, width }) => (
                     <div
@@ -279,54 +329,43 @@ class Timeline extends React.PureComponent {
                       className={classes.gridWrapper}
                     >
                       <div
-                        style={{ height: (groups.length * rowHeight) + TIMELINE_HEIGHT, width: grid_width }}
+                        style={{ height: (groups.length * rowHeight), width: grid_width }}
                         className={classes.scroller}
                       >
                         <div
                           style={{
                             left: scrollLeft,
-                            top: scrollTop,
+                            top: scrollTop - TIMELINE_HEIGHT - barSize,
+                            position: 'relative',
+                            paddingBottom: `${barSize}px`,
                           }}
                           className={classes.innerWrapper}
                         >
                           <Grid
-                            className={classes.measureContainer}
-                            rowCount={1}
-                            width={width * 2}
-                            height={TIMELINE_HEIGHT}
-                            columnWidth={columnGridWith(width, groupOffset)}
-                            columnCount={COLS}
-                            rowHeight={TIMELINE_HEIGHT}
-                            cellRenderer={this.renderTimeline}
-                            scrollLeft={scrollLeft}
-                          />
-
-                          <Grid
                             className={classes.gridStyle}
                             rowCount={1}
                             width={width}
-                            height={height}
-                            columnWidth={columnGridWith(width, groupOffset)}
+                            height={height + barSize}
+                            columnWidth={columnGridWith(width, groupOffset, colWidth)}
                             columnCount={COLS}
                             rowHeight={height}
                             cellRenderer={this.renderCol(groups.length, rowHeight, colWidth)}
                             scrollLeft={scrollLeft}
                             scrollTop={scrollTop}
                           />
-                          <div>
-                            <Grid
-                              className={classes.gridStyle}
-                              rowCount={groups.length}
-                              width={width}
-                              height={height}
-                              columnWidth={width}
-                              columnCount={1}
-                              rowHeight={rowHeight}
-                              cellRenderer={this.renderRow(colWidth, onRowClick, scrollLeft)}
-                              scrollLeft={scrollLeft}
-                              scrollTop={scrollTop}
-                            />
-                          </div>
+                          <Grid
+                            className={classes.gridStyle}
+                            rowCount={groups.length}
+                            width={width}
+                            height={height}
+                            columnWidth={width}
+                            columnCount={1}
+                            rowHeight={rowHeight}
+                            cellRenderer={this.renderRow(colWidth, onRowClick, scrollLeft)}
+                            scrollLeft={scrollLeft}
+                            scrollTop={scrollTop}
+                            style={{ paddingTop: barSize }}
+                          />
                         </div>
                       </div>
                     </div>

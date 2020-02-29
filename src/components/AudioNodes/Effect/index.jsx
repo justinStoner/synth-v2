@@ -48,8 +48,7 @@ class Effect extends React.PureComponent {
 
   render() {
     const { label = 'Effect', effectChainSize, preset, noWet, name, tone, index, addEffect, removeEffect, inputNode, outputNode, setTone, moveEffect } = this.props;
-    const setAudioNode = setTone(index)
-    const setValue = this.props.setEffect(preset, tone, inputNode, outputNode, setAudioNode);
+    const setValue = this.props.setEffect(preset, tone, inputNode, outputNode);
     return (
       <BaseCard
         label={label}
@@ -63,7 +62,7 @@ class Effect extends React.PureComponent {
           containerProps={{ style: { float: 'right' } }}
         />}
       >
-        {getComponent({ name, preset, tone, setEffect: setValue, setTone: setAudioNode, addEffect, removeEffect, inputNode, outputNode })}
+        {getComponent({ name, preset, tone, setEffect: setValue, addEffect, removeEffect, inputNode, outputNode })}
         <CardActions style={{ margin: '-8px -8px', padding: 0 }}>
           <IconButton onClick={() => {removeEffect(index)}}>
             <DeleteIcon />
