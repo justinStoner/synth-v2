@@ -1,9 +1,9 @@
-import hihat from './HH Op.wav';
-import kick from './Kick.wav';
-import perc1 from './Perc1.wav';
-import perc2 from './Perc2.wav';
-import rim from './Rim.wav';
-import snare1 from './Snare1.wav';
-import snare2 from './Snare2.wav';
+import hihat_acetone from './HH Op.wav';
+import kick_acetone from './Kick.wav';
+import perc1_acetone from './Perc1.wav';
+import perc2_acetone from './Perc2.wav';
+import rim_acetone from './Rim.wav';
+import snare1_acetone from './Snare1.wav';
+import snare2_acetone from './Snare2.wav';
 
-export { hihat, kick, perc1, perc2, rim, snare1, snare2 };
+export { hihat_acetone, kick_acetone, perc1_acetone, perc2_acetone, rim_acetone, snare1_acetone, snare2_acetone };

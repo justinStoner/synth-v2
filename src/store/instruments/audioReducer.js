@@ -18,9 +18,8 @@ const reducer = (state = initialState, action) => {
     return initialState;
   case actionType.CREATE_AUDIO_INSTRUMENT:
     return state.set(payload.id, payload);
-  case actionType.ADD_AUDIO_EFFECT:
-    console.log(payload);
-    return state.setIn([action.id, 'effects', payload.id], Object.assign({}, payload, { effect: new payload.effect(payload.preset.toJS()) }))
+  case actionType.REGISTER_INSTRUMENT:
+    return state.set(action.id, payload);
   default:
     return state
   }

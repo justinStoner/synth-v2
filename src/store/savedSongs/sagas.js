@@ -50,8 +50,6 @@ function* loadSong(action) {
     yield put(i);
   }
   yield put({ type: actionType.SET_SONG, payload });
-  yield put({ type: instrumentActions.RESET_AUDIO_INSTRUMENT });
-  yield put({ type: appActions.INITIALIZE_AUDIO })
   persistor.persist();
 }
 

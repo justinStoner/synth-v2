@@ -176,18 +176,22 @@ export const instrumentNames = [
   {
     label: 'AM Synth',
     value: 'AMSynth',
+    type: 'synth',
   },
   {
     label: 'FM Synth',
     value: 'FMSynth',
+    type: 'synth',
   },
   {
     label: 'Pluck Synth',
     value: 'PluckSynth',
+    type: 'synth',
   },
   {
     label: 'Duo Synth',
     value: 'DuoSynth',
+    type: 'synth',
   },
   {
     label: 'Sequencer',

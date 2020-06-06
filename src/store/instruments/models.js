@@ -1,4 +1,5 @@
 import { List, Record } from 'immutable';
+import uuid from 'uuid/v4';
 
 export const AudioInstrument = new Record({
   instrument: null,
@@ -31,7 +32,7 @@ export const Instrument = new Record({
   lfo1Gain: null,
   filter: null,
   instrumentOut: null,
-  channelOut: null,
+  channelOut: uuid(),
   voices: 4,
   sliderComponents: List(),
   synthComponents: List(),

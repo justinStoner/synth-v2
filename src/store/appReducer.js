@@ -14,15 +14,9 @@ import { Instrument } from './instruments/models';
 import savedSongs from './savedSongs/reducer';
 
 export const appActions = {
-  INITIALIZE_AUDIO: 'INITIALIZE_AUDIO',
-  APP_INITIALIZED: 'APP_INITIALIZED',
   PLAY_AUDIO: 'PLAY_AUDIO',
   STOP_AUDIO: 'STOP_AUDIO',
 }
-
-export const initializeAudio = () => ({
-  type: appActions.INITIALIZE_AUDIO,
-})
 
 export const playAudio = payload => ({
   type: appActions.PLAY_AUDIO,
@@ -43,13 +37,6 @@ const player = (state = 'paused', action) => {
   default:
     return state;
   }
-}
-
-const appInitialized = (state = false, action) => {
-  if (action.type === appActions.APP_INITIALIZED) {
-    return true;
-  }
-  return state;
 }
 
 export const instrumentsConfig = {
@@ -88,7 +75,6 @@ const appReducer = combineReducers({
   savedSongs: persistReducer(savedSongsConfig, savedSongs),
   player,
   output: () => Tone.Master,
-  appInitialized,
   BPM: () => 180,
   BPMe: () => 4,
   SPB: () => 4,
@@ -101,4 +87,3 @@ export const selectBPM = state => state.BPM;
 export const selectBPMe = state => state.BPMe;
 export const selectSPB = state => state.SPB;
 export const selectPlayer = state => state.player;
-export const selectAppInitialized = state => state.appInitialized;

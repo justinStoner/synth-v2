@@ -1,44 +1,75 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { selectInstruments } from '../../store/instruments/selectors';
+import Tone from 'tone';
+import { registerAudioNode, unregisterAudioNode } from '../../store/instruments/actions';
 import Synth from '../Synth';
-import Filter from '../Filter';
-import LFO from '../LFO';
+import Sequencer from '../Sequencer';
 import EffectChain from '../EffectChain';
 
 class Channel extends React.PureComponent {
 
+  constructor(props) {
+    super(props);
+    const { output, track } = this.props;
+    this.channelOut = new Tone.Channel();
+    this.channelOut.set({ volume: track.volume })
+    this.channelOut.connect(output);
+  }
+
   componentDidMount() {
-    const { audioInstrument, output } = this.props;
-    audioInstrument.channelOut.connect(output);
+    this.props.registerAudioNode(this.props.instrument.get('channelOut'), this.channelOut);
+  }
+
+  componentDidUpdate() {
+    const { track } = this.props;
+    this.channelOut.set({ volume: track.volume })
   }
 
   componentWillUnmount() {
-    const { audioInstrument } = this.props;
-    audioInstrument.channelOut.dispose();
+    this.channelOut.dispose();
   }
 
   render() {
-    const { audioInstrument, instrument } = this.props;
-    const filter = audioInstrument.filter;
+    const { instrument } = this.props;
     return (
       <>
-        <Synth preset={instrument.get('preset')} name={instrument.get('name')} synth={audioInstrument.instrument} output={audioInstrument.filter} />
-        <Filter filter={filter} output={audioInstrument.instrumentOut} />
-        <LFO lfo={audioInstrument.lfo} gain={audioInstrument.lfoGain} output={filter.frequency} />
-        <LFO lfo={audioInstrument.lfo1} gain={audioInstrument.lfo1Gain} output={filter.Q} />
-        <EffectChain
-          input={audioInstrument.instrumentOut}
-          output={audioInstrument.channelOut}
-          effects={instrument.effects}
-          audioEffects={audioInstrument.effects}
-        />
+        {
+          instrument.get('type') === 'synth' ?
+            <Synth
+              preset={instrument.get('preset')}
+              name={instrument.get('name')}
+              instrument={instrument}
+            >
+              {synth => (
+                <EffectChain
+                  input={synth}
+                  output={this.channelOut}
+                  effects={instrument.effects}
+                />
+              )}
+            </Synth> :
+            <Sequencer
+              preset={instrument.get('preset')}
+              name={instrument.get('name')}
+              instrument={instrument}
+            >
+              {sequencer => (
+                <EffectChain
+                  input={sequencer}
+                  output={this.channelOut}
+                  effects={instrument.effects}
+                />
+              )}
+            </Sequencer>
+        }
       </>
     )
   }
 }
 
-const stp = state => ({
+const dtp = dispatch => ({
+  registerAudioNode: (id, inst) => dispatch(registerAudioNode(id, inst)),
+  unregisterAudioNode: id => dispatch(unregisterAudioNode(id)),
 })
 
-export default connect(stp)(Channel)
+export default connect(undefined, dtp)(Channel)

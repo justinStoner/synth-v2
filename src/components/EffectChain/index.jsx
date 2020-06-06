@@ -1,18 +1,14 @@
 import React from 'react';
 import PT from 'prop-types';
-import clsx from 'clsx';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles, Button } from '@material-ui/core';
 import { connect } from 'react-redux';
-import PageContainer from '../PageContainer';
 import EffectChainContext from '../../context/EffectChainContext';
-import { effectPresets, effectPresetsList, effectMenuItems } from './presets';
+import { effectPresets, effectMenuItems } from './presets';
 import Effect from '../AudioNodes/Effect';
-import { withAudioContext } from '../../context/AudioContext';
-import { moveEffect, addEffect, deleteEffect, addAudioEffect } from '../../store/instruments/actions';
+import { moveEffect, addEffect, deleteEffect } from '../../store/instruments/actions';
 
 const styles = theme => ({
   paper: {
@@ -99,7 +95,6 @@ class EffectChain extends React.PureComponent {
               name={value.get('type')}
               key={value.get('id')}
               label={value.get('displayName')}
-              tone={effectChainNodes[value.get('id')].effect}
               preset={value.get('preset')}
               noWet={value.get('noWet')}
               index={index}
@@ -121,7 +116,6 @@ class EffectChain extends React.PureComponent {
 const mapDispatchToProps = dispatch => ({
   moveEffect: (id, fromIndex, toIndex) => dispatch(moveEffect(id, fromIndex, toIndex)),
   addEffect: (id, payload) => {
-    dispatch(addAudioEffect(id, payload.audioState));
     dispatch(addEffect(id, payload.uiState));
   },
   deleteEffect: (id, index) => dispatch(deleteEffect(id, index)),

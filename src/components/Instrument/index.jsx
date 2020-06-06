@@ -3,7 +3,7 @@ import PT from 'prop-types';
 import clsx from 'clsx';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import * as acetone from '../../assets/audio/acetone-rhythm';
+import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core';
 import Envelope from '../../components/AudioNodes/Envelope';
 import Oscillator from '../../components/AudioNodes/Oscillator';
@@ -15,6 +15,7 @@ import { SliderWithLabel } from '../Slider';
 import BaseCard from '../AudioNodes/BaseCard';
 import Filter from '../AudioNodes/Filter';
 import Lfo from '../AudioNodes/Lfo';
+import { playInstrument, stopInstrument } from '../../store/instruments/actions';
 
 const styles = theme => ({
   paper: {
@@ -48,7 +49,6 @@ export const SliderComponents = React.memo(({ updateInstrument, instrument }) =>
             onChange={(e, value) => {
               const newVal = { [props.name]: value };
               updateInstrument(props.parent ? ['preset', props.parent] : ['preset'], newVal);
-              instrument.get('audioNode').set(props.parent ? { [props.parent]: newVal } : newVal);
             }}
             min={props.min}
             max={props.max}
@@ -70,26 +70,14 @@ class Instrument extends React.PureComponent {
   }
 
   noteOn = e => {
-    const { instrument, lfo, lfo1, lfoGain, lfo1Gain } = this.props.audioInstrument;
-    const attack = instrument.get('envelope').attack;
-    if (e.totalPlaying === 1) {
-      lfo.start();
-      lfo1.start();
-      lfoGain.gain.linearRampToValueAtTime(1, attack);
-      lfo1Gain.gain.linearRampToValueAtTime(1, attack);
-    }
-    instrument.triggerAttack(e.name, undefined, e.velocity);
+    const { instrument } = this.props;
+    const lfo = instrument.getIn(['lfo', 'id'])
+    const lfo1 = instrument.getIn(['lfo1', 'id'])
+    this.props.playInstrument(instrument.get('id'), { name: e.name, velocity: e.velocity, lfo, lfo1 })
   }
   noteOff = e => {
-    const { instrument, lfo, lfo1, lfoGain, lfo1Gain } = this.props.audioInstrument;
-    const release = instrument.get('envelope').release;
-    if (e.totalPlaying === 0) {
-      lfoGain.gain.linearRampToValueAtTime(0, release);
-      lfo1Gain.gain.linearRampToValueAtTime(0, release);
-      lfo.stop(release);
-      lfo1.stop(release);
-    }
-    instrument.triggerRelease(e.name);
+    const { instrument } = this.props;
+    this.props.stopInstrument(instrument.get('id'), e.name)
   }
   render() {
     const { classes, setEffect, instrument, audioInstrument } = this.props;
@@ -104,27 +92,24 @@ class Instrument extends React.PureComponent {
       label: 'Lfo (Cutoff)',
       name: 'lfo',
       preset: lfo.get('preset'),
-      setValue: setEffect(instrumentId, ['lfo'])(lfo.get('preset'), audioInstrument.lfo),
+      setValue: setEffect(instrumentId, ['lfo'])(lfo.get('preset')),
     };
     const lfo1Props = {
       label: 'Lfo (Q)',
       name: 'lfo',
       preset: lfo1.get('preset'),
-      setValue: setEffect(instrumentId, ['lfo1'])(lfo1.get('preset'), audioInstrument.lfo1),
+      setValue: setEffect(instrumentId, ['lfo1'])(lfo1.get('preset')),
     };
     const filterProps = {
       preset: filter.get('preset'),
-      tone: audioInstrument.filter,
-      setEffect: setEffect(instrumentId, ['filter'])(filter.get('preset'), audioInstrument.filter),
+      tone: null, // audioInstrument.filter,
+      setEffect: setEffect(instrumentId, ['filter'])(filter.get('preset')),
     };
 
     const effectProps = {
       instrumentId,
-      inputNode: audioInstrument.instrumentOut,
-      outputNode: audioInstrument.channelOut,
       setEffect,
       effectChain: instrument.get('effects'),
-      effectChainNodes: audioInstrument.effects,
     }
 
     const synthComponents = (
@@ -144,7 +129,7 @@ class Instrument extends React.PureComponent {
     const synthControls = (
       <Paper className={clsx(classes.paper, classes.keyboardContainer)}>
         <div>
-          <Visualization source={audioInstrument.channelOut} />
+          {audioInstrument && <Visualization source={audioInstrument} />}
         </div>
         <Grid container spacing={1}>
           <SliderComponents
@@ -174,4 +159,9 @@ class Instrument extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Instrument);
+const dtp = dispatch => ({
+  playInstrument: (id, payload) => dispatch(playInstrument(id, payload)),
+  stopInstrument: (id, payload) => dispatch(stopInstrument(id, payload)),
+})
+
+export default connect(undefined, dtp)(withStyles(styles)(Instrument));

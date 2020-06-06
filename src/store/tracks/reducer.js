@@ -17,7 +17,7 @@ const reducer = (state = initialState, action) => {
   switch (action.type) {
   case actionType.RESET_TRACKS:
     return payload;
-  case actionType.UPDATE_CHANNEL_VOLUME:
+  case actionType.SET_CHANNEL_VOLUME:
     return { tracks: tracks.setIn([payload.index, 'volume'], payload.volume) }
   case actionType.CREATE_TRACK:
     return { tracks: tracks.push(createTrack(payload)) }

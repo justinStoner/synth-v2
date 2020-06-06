@@ -3,6 +3,7 @@ import Tone from 'tone';
 import { OfflineVisualization } from '../../Visualizations/OfflineVisualization';
 import { withTheme } from '@material-ui/styles';
 import CardVisualization from '../../Visualizations/CardVisualization';
+import { convertFilterPresetToTone } from '../../../utils/filters';
 
 class Visualization extends React.Component {
 
@@ -21,9 +22,9 @@ class Visualization extends React.Component {
   }
 
   getBuffer = async () => {
-    const { filter, preset } = this.props;
+    const { preset } = this.props;
     const clone = new Tone.Filter();
-    clone.set(filter.get());
+    clone.set(convertFilterPresetToTone(preset.toJS()));
     const magResponse = clone.getFrequencyResponse(100);
     clone.dispose();
     return magResponse

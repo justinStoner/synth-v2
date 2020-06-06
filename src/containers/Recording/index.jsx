@@ -5,9 +5,6 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import { Map } from 'immutable'
 import { connect } from 'react-redux';
-import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
-import Stop from '@material-ui/icons/Stop';
-import VolumeOff from '@material-ui/icons/VolumeOff';
 import Tooltip from '@material-ui/core/Tooltip';
 import VolumeUp from '@material-ui/icons/VolumeUp';
 import Typography from '@material-ui/core/Typography';
@@ -35,6 +32,8 @@ import { SliderWithLabel } from '../../components/Slider';
 import Instrument from '../../components/Instrument';
 import { selectInstruments, selectAudioInstruments } from '../../store/instruments/selectors';
 import RecordingContext from '../../context/RecordingContext';
+import SampleRoll from '../../components/SampleRoll';
+import Sequencer from '../../components/Sequencer';
 
 const styles = theme => ({
   paper: {
@@ -151,7 +150,6 @@ class Recording extends PureComponent {
   }
 
   handleRowClick = (e, rowIndex, group) => {
-    console.log(e.target, rowIndex, group);
     if (e.target.getAttribute('data-row-index') == rowIndex) {
       const { clips, SPB, addClip } = this.props;
       const stepSize = COL_WIDTH / SPB;
@@ -159,6 +157,7 @@ class Recording extends PureComponent {
       const newClip = new ClipRecord({
         id: group.id,
         trackId: group.id,
+        instrumentId: group.instrumentId,
         row: group.id,
         key: uuid(),
         title: group.title,
@@ -173,7 +172,7 @@ class Recording extends PureComponent {
         duration: Tone.Ticks(Tone.Time(`${Math.floor((stepIndex + 2) / SPB)}:${Math.floor((stepIndex + 2) % SPB)}`).toTicks() - Tone.Time(`${Math.floor((stepIndex + 1) / SPB)}:${Math.floor((stepIndex + 1) % SPB)}`).toTicks()).toNotation(),
       })
       addClip(newClip);
-      this.setState({ selectedSample: newClip.key })
+      this.setState({ selectedSample: newClip.key, selectedTrack: newClip.trackId })
     }
   };
   zoomIn() {
@@ -199,7 +198,7 @@ class Recording extends PureComponent {
   handleItemClick = (e, item, rowIndex) => {
     console.log(e, item, rowIndex)
     console.log(item.toJS());
-    this.setState({ selectedSample: item.key })
+    this.setState({ selectedSample: item.key, selectedTrack: item.trackId })
 
   };
 
@@ -237,6 +236,7 @@ class Recording extends PureComponent {
     const { classes, clips, tracks, BPM, BPMe, SPB, addTrack, setChannelVolume, instruments, audioInstruments } = this.props;
     const { selectedTrack, selectedSample, menuAnchor } = this.state;
     const instrumentId = tracks.getIn([selectedTrack, 'instrumentId']);
+    const instrument = instruments.get(instrumentId);
     return (
       <RecordingContext.Provider value={this.state}>
         <div style={{ height: 'calc(100% - 90px)' }}>
@@ -252,7 +252,7 @@ class Recording extends PureComponent {
                 instrumentNames.map(item => (
                   <MenuItem
                     key={item.value}
-                    onClick={() => {addTrack(item)}}
+                    onClick={() => {this.setState({ menuAnchor: null });addTrack(item)}}
                   >
                     {item.label}
                   </MenuItem>
@@ -295,35 +295,42 @@ class Recording extends PureComponent {
                 textColor="primary"
                 centered
               >
-                <Tab label="Piano roll"/>
+                <Tab label={instrument.get('type') === 'synth' ? 'Piano roll' : 'Sequencer'}/>
                 <Tab label="Instrument settings"/>
                 <Tab label="Effect settings"/>
               </Tabs>
             </Paper>
-            {this.state.tab === 0 &&<PianoRoll
-              sample={clips.getIn([selectedSample])}
-            />}
+            {this.state.tab === 0 && (instrument.get('type') === 'synth' ?
+              <PianoRoll sample={clips.getIn([selectedSample])}/> : <SampleRoll sample={clips.getIn([selectedSample])}/>)}
             {this.state.tab === 1 && (
               <Grid container spacing={1}>
-                <Instrument
-                  render={({ synthComponents }) => <>{synthComponents}</>}
-                  size="xs"
-                  setEffect={this.updateEffect}
-                  updateInstrument={this.getUpdateInstrument(instrumentId)}
-                  instrument={instruments.get(instrumentId)}
-                  audioInstrument={audioInstruments.get(instrumentId)}
-                />
+                {
+                  instrument.get('type') === 'synth' ? (
+                    <Instrument
+                      render={({ synthComponents }) => <>{synthComponents}</>}
+                      size="xs"
+                      setEffect={this.updateEffect}
+                      updateInstrument={this.getUpdateInstrument(instrumentId)}
+                      instrument={instrument}
+                      audioInstrument={audioInstruments.get(instrumentId)}
+                    />
+                  ) :
+                    <Sequencer render={({ sequencerComponents }) => <>{sequencerComponents}</>} />
+                }
               </Grid>
             )}
             {this.state.tab === 2 && (
               <Grid container spacing={1}>
-                <Instrument
-                  render={({ effectComponents }) => <>{effectComponents}</>}
-                  setEffect={this.updateEffect}
-                  updateInstrument={this.getUpdateInstrument(instrumentId)}
-                  instrument={instruments.get(instrumentId)}
-                  audioInstrument={audioInstruments.get(instrumentId)}
-                />
+                {instrument.get('type') === 'synth' ?
+                  <Instrument
+                    render={({ effectComponents }) => <>{effectComponents}</>}
+                    setEffect={this.updateEffect}
+                    updateInstrument={this.getUpdateInstrument(instrumentId)}
+                    instrument={instrument}
+                    audioInstrument={audioInstruments.get(instrumentId)}
+                  /> :
+                  <div>coming soon</div>
+                }
               </Grid>
             )}
           </div>

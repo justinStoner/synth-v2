@@ -8,7 +8,7 @@ export const setType = (node, value) => {
   node.type = value;
 }
 
-export const Chorus = ({ preset, tone, setEffect }) => {
+export const Chorus = ({ preset, setEffect }) => {
   console.log();
   return (
     <>

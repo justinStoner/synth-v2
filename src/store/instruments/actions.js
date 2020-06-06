@@ -9,12 +9,37 @@ export const actionType = {
   DELETE_INSTRUMENT: 'DELETE_INSTRUMENT',
   RESET_INSTRUMENT: 'RESET_INSTRUMENT',
 
-  CREATE_AUDIO_INSTRUMENT: 'CREATE_AUDIO_INSTRUMENT',
-  RESET_AUDIO_INSTRUMENT: 'RESET_AUDIO_INSTRUMENT',
-  CLEAR_AUDIO_INSTRUMENTS: 'CLEAR_AUDIO_INSTRUMENTS',
+  REGISTER_INSTRUMENT: 'REGISTER_INSTRUMENT',
+  UNREGISTER_INSTRUMENT: 'UNREGISTER_INSTRUMENT',
 
-  ADD_AUDIO_EFFECT: 'ADD_AUDIO_EFFECT',
+  PLAY_INSTRUMENT: 'PLAY_INSTRUMENT',
+  STOP_INSTRUMENT: 'STOP_INSTRUMENT',
+
+  CLEAR_AUDIO_INSTRUMENTS: 'CLEAR_AUDIO_INSTRUMENTS',
 }
+
+export const stopInstrument = (id, payload) => ({
+  type: actionType.STOP_INSTRUMENT,
+  payload,
+  id,
+})
+
+export const playInstrument = (id, payload) => ({
+  type: actionType.PLAY_INSTRUMENT,
+  payload,
+  id,
+})
+
+export const registerAudioNode = (id, payload) => ({
+  type: actionType.REGISTER_INSTRUMENT,
+  payload,
+  id,
+})
+
+export const unregisterAudioNode = id => ({
+  type: actionType.UNREGISTER_INSTRUMENT,
+  id,
+})
 
 export const moveEffect = (id, fromIndex, toIndex) => ({
   type: actionType.MOVE_EFFECT,
@@ -25,12 +50,6 @@ export const moveEffect = (id, fromIndex, toIndex) => ({
 
 export const addEffect = (id, payload) => ({
   type: actionType.ADD_EFFECT,
-  payload,
-  id,
-})
-
-export const addAudioEffect = (id, payload) => ({
-  type: actionType.ADD_AUDIO_EFFECT,
   payload,
   id,
 })

@@ -51,7 +51,7 @@ const HeaderControls = ({ player, playAudio, stopAudio, savedSongs, saveSong, lo
   const [modalOpen, setModalOpen] = useState(false);
   const [tabs, setTabs] = useState(0);
   const [songName, setSongName] = useState({ name: null });
-  const [songToSave, setSongToSave] = useState(-1);
+  const [songToSave, setSongToSave] = useState('-1');
   return (
     <Toolbar>
       <IconButton onClick={() => {setModalOpen(true)}} edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
@@ -125,13 +125,14 @@ const HeaderControls = ({ player, playAudio, stopAudio, savedSongs, saveSong, lo
             Cancel
           </Button>
           <Button
-            disabled={tabs === 0 && songToSave === -1 && songName.name === null}
+            disabled={tabs === 0 && songToSave === '-1' && songName.name === null}
             onClick={() => {
+              const song = parseInt(songToSave);
               setModalOpen(false);
               if (tabs === 0) {
-                saveSong(songToSave === -1 ? songName : savedSongs[songToSave]);
+                saveSong(song === -1 ? songName : savedSongs[song]);
               } else {
-                loadSong(savedSongs[parseInt(songToSave)].id)
+                loadSong(savedSongs[song].id)
               }
               setSongName({ name: null })
             }}
@@ -153,7 +154,7 @@ const stp = s => ({
 const dtp = d => ({
   playAudio: () => d(playAudio()),
   stopAudio: () => d(stopAudio()),
-  saveSong: (name, id) => d(saveSong(name, id)),
+  saveSong: newSong => d(saveSong(newSong)),
   loadSong: id => d(loadSong(id)),
 })
 

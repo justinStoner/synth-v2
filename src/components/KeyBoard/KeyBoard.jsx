@@ -54,40 +54,6 @@ class KeyBoard extends React.PureComponent {
     delete this.computerKeyboard;
   }
 
-  getNoteByTouchId = id => {
-    // const octave = Array.from(this.shadowRoot.querySelectorAll('tone-keyboard-octave')).find(o => o._getNoteByTouchId(id))
-    // if (octave){
-    //   return octave._getNoteByTouchId(id)
-    // }
-  }
-
-  touchmove = event => {
-    // Array.from(event.changedTouches).forEach(e => {
-    //   const activeNote = this._getNoteByTouchId(e.identifier)
-    //   const element = this.shadowRoot.elementFromPoint(e.clientX, e.clientY)
-    //   if (element && element.shadowRoot){
-    //     const note = element.shadowRoot.elementFromPoint(e.clientX, e.clientY)
-    //     if (note && note.note && activeNote.note !== note.note){
-    //       activeNote.active = false
-    //       activeNote.touchid = -1
-    //       note.active = true
-    //       note.touchid = e.identifier
-    //     }
-    //   }
-    // })
-  }
-
-  touchend = event => {
-    // Array.from(event.changedTouches).forEach(e => {
-    //   this.getNoteByTouchId(e.identifier)
-    //   const activeNote = this.getNoteByTouchId(e.identifier)
-    //   if (activeNote && activeNote.active){
-    //     activeNote.active = false
-    //     activeNote.touchid = -1
-    //   }
-    // })
-  }
-
   setOctaves() {
     const octaves = []
     for (let i = this.props.rootOctave; i < this.props.rootOctave + this.props.octaves; i++){
@@ -103,21 +69,19 @@ class KeyBoard extends React.PureComponent {
   }
 
   noteOn = e => {
-    const octaveNumber = Math.floor(e.midi / 12);
     const name = fromMidi(e.midi);
     this.setActiveNote(e.note)
     this.props.noteOn(Object.assign({}, e, { name, totalPlaying: this.state.totalPlaying }))
   }
 
   noteOff = e => {
-    const octaveNumber = Math.floor(e.midi / 12);
     this.setActiveNote(e.note)
     this.props.noteOff(Object.assign({}, e, { name: fromMidi(e.midi), totalPlaying: this.state.totalPlaying }));
   }
 
   render(){
     const { octaves, activeNotes } = this.state;
-    const { rootOctave, classes } = this.props;
+    const { classes } = this.props;
     return(
       <div className={classes.container}
         onTouchMove={this.touchmove}

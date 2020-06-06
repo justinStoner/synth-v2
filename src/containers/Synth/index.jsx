@@ -9,6 +9,8 @@ import { selectInstruments, selectAudioInstruments } from '../../store/instrumen
 import { updateInstrument, updateEffect } from '../../store/instruments/actions';
 import { selectOutput } from '../../store/appReducer';
 import PageContainer from '../../components/PageContainer';
+import Sequencer from '../../components/Sequencer';
+
 
 const styles = theme => ({
   paper: {
@@ -33,13 +35,12 @@ class Synth extends React.PureComponent {
 
   updateEffect = (id, path) => (preset, tone, inputNode, outputNode, setTone) => (valueName, setToneEffect) => (event, value) => {
     const val = event && event.target && event.target.value ? event.target.value : value;
-    setToneEffect && setToneEffect(tone, val, valueName, preset, inputNode, outputNode, setTone);
+    // setToneEffect && setToneEffect(tone, val, valueName, preset, inputNode, outputNode, setTone);
     this.props.updateEffect(id, path, valueName, val)
   }
 
   render() {
     const { classes, match, instruments, audioContext, output, audioInstruments } = this.props;
-    console.log(instruments);
     const defaultId = instruments.first().get('id')
     return (
       <Switch>
@@ -48,46 +49,72 @@ class Synth extends React.PureComponent {
           const instrument = instruments.get(instrumentId) || instruments.get(defaultId);
           const audioInstrument = audioInstruments.get(instrumentId);
           return (
-            <Instrument
-              instrument={instrument}
-              audioInstrument={audioInstrument}
-              output={output}
-              setEffect={this.updateEffect}
-              updateInstrument={this.getUpdateInstrument(instrumentId)}
-              render={({ synthComponents, effectComponents, synthControls }) => (
-                <PageContainer>
-                  <Grid container spacing={1}>
-                    <Switch>
-                      <Route
-                        exact
-                        path={`${instrumentMatch.path}/instrument`}
-                        render={() => (
-                          <>
-                            {synthComponents}
-                            <Grid item xs={12}>
-                              {synthControls}
-                            </Grid>
-                          </>
-                        )}
-                      />
-                      <Route
-                        exact
-                        path={`${instrumentMatch.path}/effects`}
-                        render={() => (
+            <>
+              {
+                instrument.get('type') === 'synth' ?
+                  <Instrument
+                    instrument={instrument}
+                    audioInstrument={audioInstrument}
+                    output={output}
+                    setEffect={this.updateEffect}
+                    updateInstrument={this.getUpdateInstrument(instrumentId)}
+                    render={({ synthComponents, effectComponents, synthControls }) => (
+                      <PageContainer>
+                        <Grid container spacing={1}>
+                          <Switch>
+                            <Route
+                              exact
+                              path={`${instrumentMatch.path}/instrument`}
+                              render={() => (
+                                <>
+                                  {synthComponents}
+                                  <Grid item xs={12}>
+                                    {synthControls}
+                                  </Grid>
+                                </>
+                              )}
+                            />
+                            <Route
+                              exact
+                              path={`${instrumentMatch.path}/effects`}
+                              render={() => (
                           <>
                             {effectComponents}
                             <Grid item xs={12}>
                               {synthControls}
                             </Grid>
                           </>
-                        )}
-                      />
-                      <Redirect to={`${instrumentMatch.path}/instrument`} />
-                    </Switch>
-                  </Grid>
-                </PageContainer>
-              )}
-            />
+                              )}
+                            />
+                            <Redirect to={`${instrumentMatch.path}/instrument`} />
+                          </Switch>
+                        </Grid>
+                      </PageContainer>
+                    )}
+                  />
+                  :
+                  <Sequencer render={({ sequencerComponents }) => (
+                    <PageContainer>
+                      <Grid container spacing={1}>
+                        <Switch>
+                          <Route
+                            exact
+                            path={`${instrumentMatch.path}/instrument`}
+                            render={() => (sequencerComponents)}
+                          />
+                          <Route
+                            exact
+                            path={`${instrumentMatch.path}/effects`}
+                            render={() => (<div>coming soon</div>)}
+                          />
+                          <Redirect to={`${instrumentMatch.path}/instrument`} />
+                        </Switch>
+                      </Grid>
+                    </PageContainer>
+                  )}
+                  />
+              }
+            </>
           )
         }} />
         <Redirect to={`${match.path}/${defaultId}`}/>

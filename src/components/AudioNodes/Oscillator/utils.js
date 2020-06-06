@@ -1,4 +1,4 @@
-export const buildToneOscillatorType = ({ sourceType, baseType, partialCount }) => `${sourceType === 'osc' ? '' : sourceType}${sourceType === oscillatorSourceTypes.pulse || sourceType === oscillatorSourceTypes.pwm ? '' : baseType}${!partialCount ? '' : partialCount}`;
+export const buildToneOscillatorType = ({ sourceType, baseType, partialCount }) => `${sourceType === 'osc' ? '' : sourceType}${sourceType === oscillatorSourceTypes.pulse || sourceType === oscillatorSourceTypes.pwm ? '' : baseType}${!partialCount || sourceType === oscillatorSourceTypes.pulse || sourceType === oscillatorSourceTypes.pwm ? '' : partialCount}`;
 
 export const convertOscillatorToToneOscillator = ({ baseType, sourceType, partialCount, ...rest }) => ({
   type: buildToneOscillatorType({ sourceType, baseType, partialCount }),

@@ -1,0 +1,1 @@
+export const convertFilterPresetToTone = preset => Object.assign({}, preset, { rolloff: Math.abs(preset.rolloff) * -1 })

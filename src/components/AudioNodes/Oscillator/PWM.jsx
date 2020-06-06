@@ -7,7 +7,7 @@ import { setPartialCount, setBaseType, setWidth, setModulationFrequency  } from 
 
 export const PWM = ({ preset, setValue, hidePartials = false }) => (
     <>
-     <SliderWithLabel onChange={setValue('modulationFrequency', setModulationFrequency)} label="Modulation Frequency" value={preset.get('modulationFrequency')} min={0.1} max={10} step={0.1} />
+     <SliderWithLabel onChange={setValue('modulationFrequency')} label="Modulation Frequency" value={preset.get('modulationFrequency')} min={0.1} max={10} step={0.1} />
     </>
 );
 

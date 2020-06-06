@@ -1,24 +1,71 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { selectInstruments } from '../../store/instruments/selectors';
+import Tone from 'tone';
+import Filter from '../Filter';
+import LFO from '../LFO';
+import { registerAudioNode, unregisterAudioNode } from '../../store/instruments/actions';
+import { tonePresets } from '../../containers/Synth/presets';
+
+const createSynthFromName = (name, voices = 4, preset = 0) => {
+  switch(name) {
+  case 'PluckSynth':
+    return new Tone.PluckSynth(tonePresets[name][preset])
+  default:
+    return new Tone.PolySynth(voices, Tone[name], tonePresets[name][preset])
+  }
+}
 
 class Synth extends React.PureComponent {
 
+  constructor(props) {
+    super(props);
+    const { output, name } = this.props;
+    this.synth = createSynthFromName(name);
+    this.gain = new Tone.Gain();
+    if (output) {
+      this.gain.connect(output);
+    }
+  }
+
   componentDidMount() {
-    const { synth, output } = this.props;
-    synth.connect(output);
+    this.props.registerAudioNode(this.props.instrument.get('id'), this.synth);
+  }
+
+  componentDidUpdate() {
+    this.synth.set(this.props.preset.toJS())
   }
 
   componentWillUnmount() {
-    const { synth } = this.props;
-    synth.dispose();
+    this.synth.dispose();
+    this.gain.dispose();
+    this.props.unregisterAudioNode(this.props.instrument.get('id'));
   }
 
   render() {
-    const { preset } = this.props;
+    const { instrument } = this.props;
     return (
       <>
-
+        <Filter
+          input={this.synth}
+          output={this.gain}
+          preset={instrument.getIn(['filter', 'preset'])}
+        >
+          {filterNode => (
+            <>
+              <LFO
+                preset={instrument.getIn(['lfo', 'preset'])}
+                id={instrument.getIn(['lfo', 'id'])}
+                output={filterNode.frequency}
+              />
+              <LFO
+                preset={instrument.getIn(['lfo1', 'preset'])}
+                id={instrument.getIn(['lfo1', 'id'])}
+                output={filterNode.Q}
+              />
+            </>
+          )}
+        </Filter>
+        {this.props.children(this.gain)}
       </>
     )
   }
@@ -27,4 +74,9 @@ class Synth extends React.PureComponent {
 const stp = state => ({
 })
 
-export default connect(stp)(Synth)
+const dtp = dispatch => ({
+  registerAudioNode: (id, inst) => dispatch(registerAudioNode(id, inst)),
+  unregisterAudioNode: id => dispatch(unregisterAudioNode(id)),
+})
+
+export default connect(stp, dtp)(Synth)

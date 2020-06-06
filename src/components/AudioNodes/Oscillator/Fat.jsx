@@ -9,8 +9,8 @@ import { Osc } from './Osc';
 export const Fat = ({ preset, setValue }) => (
     <>
       <Osc preset={preset} setValue={setValue} />
-      <SliderWithLabel onChange={setValue('spread', setSpread)} label="Spread" value={preset.get('spread')} min={2} max={100} step={1} />
-      <SliderWithLabel onChange={setValue('count', setCount)} label="Count" value={preset.get('count')} min={1} max={10} step={1} />
+      <SliderWithLabel onChange={setValue('spread')} label="Spread" value={preset.get('spread')} min={2} max={100} step={1} />
+      <SliderWithLabel onChange={setValue('count')} label="Count" value={preset.get('count')} min={1} max={10} step={1} />
     </>
 );
 

@@ -21,7 +21,7 @@ class Visualization extends React.Component {
   }
 
   getBuffer = async () => {
-    const { compressor, preset } = this.props;
+    const { preset } = this.props;
     const options = preset.toJS()
 
     const padding = 0.001

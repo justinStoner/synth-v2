@@ -9,8 +9,8 @@ import { Osc } from './Osc';
 export const AM = ({ preset, setValue }) => (
     <>
       <Osc preset={preset} setValue={setValue} />
-      <FullWidthSelect items={waveFormsDropdownItems} label="Modulation Type" value={preset.get('modulationType')} onChange={setValue('modulationType', setBaseType)} />
-      <SliderWithLabel onChange={setValue('harmonicity', setHarmonicity)} label="Harmonicity" value={preset.get('harmonicity')} min={0} max={5} step={0.05} />
+      <FullWidthSelect items={waveFormsDropdownItems} label="Modulation Type" value={preset.get('modulationType')} onChange={setValue('modulationType')} />
+      <SliderWithLabel onChange={setValue('harmonicity')} label="Harmonicity" value={preset.get('harmonicity')} min={0} max={5} step={0.05} />
     </>
 );
 

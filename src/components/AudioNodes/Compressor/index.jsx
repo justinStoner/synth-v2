@@ -3,39 +3,39 @@ import { SliderWithLabel } from '../../Slider';
 import { setToneSignalValue } from '../../../utils';
 import Visualization from './Visualization';
 
-export const Compressor = ({ preset, tone, setEffect, setTone, inputNode, outputNode }) => (
+export const Compressor = ({ preset, setEffect }) => (
     <>
-      <Visualization compressor={tone} preset={preset} />
+      <Visualization preset={preset} />
       <SliderWithLabel
-        onChange={setEffect('ratio', setToneSignalValue)}
+        onChange={setEffect('ratio')}
         label="Ratio" value={preset.get('ratio')}
         min={1}
         max={20}
         step={1}
       />
       <SliderWithLabel
-        onChange={setEffect('threshold', setToneSignalValue)}
+        onChange={setEffect('threshold')}
         label="Threshold" value={preset.get('threshold')}
         min={-100}
         max={0}
         step={1}
       />
       <SliderWithLabel
-        onChange={setEffect('attack', setToneSignalValue)}
+        onChange={setEffect('attack')}
         label="Attack" value={preset.get('attack')}
         min={0.01}
         max={4}
         step={0.05}
       />
       <SliderWithLabel
-        onChange={setEffect('release', setToneSignalValue)}
+        onChange={setEffect('release')}
         label="Release" value={preset.get('release')}
         min={0.01}
         max={4}
         step={0.05}
       />
       <SliderWithLabel
-        onChange={setEffect('knee', setToneSignalValue)}
+        onChange={setEffect('knee')}
         label="Knee" value={preset.get('knee')}
         min={0}
         max={40}

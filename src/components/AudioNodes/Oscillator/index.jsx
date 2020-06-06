@@ -44,9 +44,9 @@ const Oscillator = ({ label = 'Oscillator', classes, preset, audioNode, setValue
     <BaseCard
       label={label}
       size={size}
-      headerComponent={<HeaderSelect items={oscillatorSourceTypesDisplayNames} value={sourceType} onChange={e => {setPreset(oscillatorPresets[e.target.value][0]); setSourceType(audioNode, e.target.value, null, oscillatorPresets[e.target.value][0].toJS())}} />}
+      headerComponent={<HeaderSelect items={oscillatorSourceTypesDisplayNames} value={sourceType} onChange={e => {setPreset(oscillatorPresets[e.target.value][0]); /* setSourceType(audioNode, e.target.value, null, oscillatorPresets[e.target.value][0].toJS()) */}} />}
     >
-      <Visualization audioNode={audioNode} preset={preset} />
+      <Visualization preset={preset} />
       {getComponent(sourceType, { preset, setValue })}
     </BaseCard>
   )

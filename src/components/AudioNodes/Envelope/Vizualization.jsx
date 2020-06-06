@@ -22,7 +22,7 @@ class Visualization extends React.PureComponent {
 
   getBuffer = async () => {
     const { audioNode, preset } = this.props;
-    const options = audioNode.get()
+    const options = preset.toJS()
     const padding = 0.001
     const scalar = 1
     const totalTime = options.attack + options.decay + options.release

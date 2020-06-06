@@ -3,7 +3,6 @@ import Tone from 'tone';
 import { connect } from 'react-redux';
 import { Rnd } from 'react-rnd';
 import { withStyles } from '@material-ui/core';
-import { withAudioContext } from '../../context/AudioContext';
 import '../../containers/Recording/clipStyles.css';
 import { updateNote, deleteNote } from '../../store/clips/actions';
 
@@ -43,7 +42,6 @@ class Note extends React.PureComponent {
     const { grid } = this.state;
     const xDelta = data.x - x;
     const isXDrag = Math.abs(data.lastY) < Math.abs(xDelta);
-    console.log(e, data.lastY, data.x -x);
     if (data.deltaX !== 0 && isXDrag) {
       const normalizedDelta = Math.abs(xDelta);
       const stepDelta = Math.floor((Math.max(normalizedDelta, grid[0]) + (normalizedDelta % grid[0])) / grid[0]) * (xDelta < 0 ? -1 : 1)
@@ -64,7 +62,6 @@ class Note extends React.PureComponent {
         endTime,
         duration: Tone.Ticks(Tone.Time(endTime).toTicks() - Tone.Time(time).toTicks()).toNotation(),
       }
-      console.log(stateToMerge)
       updateNote([item.clipId, 'notes', item.key], stateToMerge)
     } else if (!isXDrag && Math.abs(data.lastY) >= height) {
       const normalizedDelta = Math.abs(data.lastY);

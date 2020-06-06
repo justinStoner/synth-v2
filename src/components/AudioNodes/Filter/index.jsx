@@ -36,7 +36,7 @@ export const Filter = ({ preset, tone, setEffect }) => {
     <>
       <Visualization filter={tone} preset={preset} />
       <SliderWithLabel
-        onChange={setEffect('frequency', setToneSignalValue)}
+        onChange={setEffect('frequency')}
         label="Frequency"
         value={preset.get('frequency')}
         min={1}
@@ -44,14 +44,14 @@ export const Filter = ({ preset, tone, setEffect }) => {
         step={50}
       />
       <SliderWithLabel
-        onChange={(e, newValue) => {setRolloff(null, newValue);setToneRolloff(tone, newValue)}}
+        onChange={(e, newValue) => {setRolloff(null, newValue)}}
         label="Rolloff"
         value={Math.abs(preset.get('rolloff'))}
         step={null}
         marks={marks}
       />
       <SliderWithLabel
-        onChange={setEffect('Q', setToneSignalValue)}
+        onChange={setEffect('Q')}
         label="Q"
         value={preset.get('Q')}
         min={0.01}
@@ -62,10 +62,10 @@ export const Filter = ({ preset, tone, setEffect }) => {
         items={filterDropdownItems}
         label="Type"
         value={preset.get('type')}
-        onChange={setEffect('type', setToneValue)}
+        onChange={setEffect('type')}
       />
       <SliderWithLabel
-        onChange={setEffect('gain', setToneSignalValue)}
+        onChange={setEffect('gain')}
         label="Gain"
         value={preset.get('gain')}
         min={-40}

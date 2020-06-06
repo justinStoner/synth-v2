@@ -1,24 +1,33 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import Tone from 'tone';
 import { selectInstruments } from '../../store/instruments/selectors';
+import { convertFilterPresetToTone } from '../../utils/filters';
 
 class Filter extends React.PureComponent {
 
-  componentDidMount() {
-    const { filter, output } = this.props;
-    filter.connect(output);
+  constructor(props) {
+    super(props);
+    const { preset, output, input } = this.props;
+    this.filter = new Tone.Filter(convertFilterPresetToTone(preset.toJS()));
+    input.connect(this.filter);
+    this.filter.connect(output);
+  }
+
+  componentDidUpdate() {
+    const { preset } = this.props;
+    this.filter.set(convertFilterPresetToTone(preset.toJS()))
   }
 
   componentWillUnmount() {
-    const { filter } = this.props;
-    filter.dispose();
+    this.filter.dispose();
   }
 
   render() {
     const { preset } = this.props;
     return (
       <>
-
+        {this.props.children(this.filter)}
       </>
     )
   }

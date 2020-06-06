@@ -95,11 +95,21 @@ class Note extends React.Component {
   }
 
   mouseover = e => {
-    this.setState({ hover: true })
+    this.setState({ hover: true });
   }
 
   mouseleave = e => {
     this.setState({ hover: false })
+  }
+
+  onMouseDown = () => {
+    this.setActive();
+    this.props.noteOn({ note: this.fromMidi(this.props.note), midi: this.props.note })
+  }
+
+  onMouseUp = () => {
+    this.setActive();
+    this.props.noteOff({ note: this.fromMidi(this.props.note), midi: this.props.note })
   }
 
   keydown = e => {
@@ -115,14 +125,18 @@ class Note extends React.Component {
     }
   }
 
-  touchstart = e => {
-    e.preventDefault()
-    this.touchid = e.touches[0].identifier
-    this.setActive(this.props.note)
+  onMouseDown = () => {
+    this.setActive();
+    this.props.noteOn({ note: this.fromMidi(this.props.note), midi: this.props.note })
+  }
+
+  onMouseUp = () => {
+    this.setActive();
+    this.props.noteOff({ note: this.fromMidi(this.props.note), midi: this.props.note })
   }
 
   render(){
-    const { classes, note, isWhite, isActive, setActiveNote } = this.props;
+    const { classes, note, isWhite, isActive, setActiveNote, noteOn, noteOff } = this.props;
     const { hover } = this.state;
     const show = note > 0
     return (
@@ -131,13 +145,14 @@ class Note extends React.Component {
           className={clsx(classes.paper, isWhite ? classes.white : classes.grey, isActive && classes.isActive, (!isActive && hover) && classes.hover)}
           onMouseOver={this.mouseover}
           onMouseLeave={this.mouseleave}
-          onMouseDown={() => this.setActive(note)}
-          onTouchStart={this.touchstart}
-          onTouchEnd={() => this.setActive(note)}
-          onMouseUp={() => this.setActive(note)}
+          onMouseDown={this.onMouseDown}
+          onTouchStart={this.onTouchStart}
+          onTouchEnd={this.onTouchEnd}
+          onMouseUp={this.onMouseUp}
           onKeyDown={this.keydown}
           onKeyUp={this.keyup}
           elevation={0}
+          style={{ cursor: 'pointer' }}
         >
           {this.fromMidi(note).replace('#', '♯')}
         </Paper>}
