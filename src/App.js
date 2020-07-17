@@ -7,9 +7,6 @@ import {
 import CssBaseline from "@material-ui/core/CssBaseline";
 import blue from "@material-ui/core/colors/blue";
 import red from "@material-ui/core/colors/red";
-import Typography from "@material-ui/core/Typography";
-import Link from "@material-ui/core/Link";
-import { LinkedInIcon } from "@material-ui/icons";
 import {
   BrowserRouter as Router,
   Route,
@@ -70,12 +67,6 @@ const Dashboard = () => {
                   <Redirect to={routes[0].route} />
                 </Switch>
                 <AudioRoot />
-                <Typography variant="caption">
-                  Made by Justin Stoner{" "}
-                  <Link href="https://www.linkedin.com/in/justin-stoner-95160487/">
-                    <LinkedInIcon />
-                  </Link>
-                </Typography>
               </main>
             </div>
           </Router>
