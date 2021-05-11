@@ -19,7 +19,7 @@
     "heartbeat-sequencer": "0.0.15",
     "immutable": "^4.0.0-rc.12",
     "interactjs": "^1.6.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "lzutf8": "^0.5.5",
     "moment": "^2.24.0",
     "opus-recorder": "^6.1.1",
